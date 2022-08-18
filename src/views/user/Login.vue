@@ -14,18 +14,18 @@
       >
         <a-tab-pane key="tab1" :tab="$t('user.login.tab-login-credentials')">
           <a-alert v-if="isLoginError" type="error" showIcon style="margin-bottom: 24px;" :message="$t('user.login.message-invalid-credentials')" />
-<!--          <a-form-item>-->
-<!--            <a-input-->
-<!--              size="large"-->
-<!--              type="text"-->
-<!--              v-decorator="[-->
-<!--                'username',-->
-<!--                {rules: [{ required: true, message: $t('user.userName.required') }, { validator: handleUsernameOrEmail }], validateTrigger: 'change'}-->
-<!--              ]"-->
-<!--            >-->
-<!--              <a-icon slot="prefix" type="user" :style="{ color: 'rgba(0,0,0,.25)' }"/>-->
-<!--            </a-input>-->
-<!--          </a-form-item>-->
+          <!--          <a-form-item>-->
+          <!--            <a-input-->
+          <!--              size="large"-->
+          <!--              type="text"-->
+          <!--              v-decorator="[-->
+          <!--                'username',-->
+          <!--                {rules: [{ required: true, message: $t('user.userName.required') }, { validator: handleUsernameOrEmail }], validateTrigger: 'change'}-->
+          <!--              ]"-->
+          <!--            >-->
+          <!--              <a-icon slot="prefix" type="user" :style="{ color: 'rgba(0,0,0,.25)' }"/>-->
+          <!--            </a-input>-->
+          <!--          </a-form-item>-->
           <a-form-item>
 
             <a-select
@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import md5 from 'md5'
+// import md5 from 'md5'
 import { mapActions } from 'vuex'
 import { timeFix } from '@/utils/util'
 
@@ -151,7 +151,8 @@ export default {
           const loginParams = { ...values }
           // delete loginParams.username
           // loginParams[!state.loginType ? 'email' : 'username'] = 'college'
-          loginParams.password = md5(values.password)
+          // loginParams.password = md5(values.password)
+          loginParams.password = values.password
           Login(loginParams)
             .then((res) => this.loginSuccess(res))
             .catch(err => this.requestFailed(err))

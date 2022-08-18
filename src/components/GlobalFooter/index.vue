@@ -1,13 +1,18 @@
 <template>
   <global-footer class="footer custom-render">
     <template v-slot:links>
-      <a href="https://www.github.com/vueComponent/pro-layout" target="_blank">Pro Layout</a>
-      <a href="https://www.github.com/vueComponent/ant-design-vue-pro" target="_blank">Github</a>
-      <a href="https://www.github.com/sendya/" target="_blank">@Sendya</a>
+      Copyright &copy; {{ new Date().getFullYear() }} <a href="https://github.com/sadscv" target="_blank">sadscv
+      </a>.
+      All Rights Reserved.
     </template>
     <template v-slot:copyright>
-      <a href="https://github.com/vueComponent" target="_blank">vueComponent</a>
+      数据来源: <a href="http://jwc.jxnu.edu.cn/" target="_blank">江西师范大学</a> 版权归江西师范大学所有
     </template>
+    <div>
+      Copyright &copy; {{ new Date().getFullYear() }} <a href="https://github.com/sadscv" target="_blank">sadscv
+      </a>.
+      All Rights Reserved.
+    </div>
   </global-footer>
 </template>
 

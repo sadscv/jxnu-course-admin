@@ -22,7 +22,7 @@
     <template v-slot:menuHeaderRender>
       <div>
         <logo-svg />
-        <h1>{{ title }}</h1>
+        <h1>{{ '课程管理系统' }}</h1>
       </div>
     </template>
     <!-- 1.0.0+ 版本 pro-layout 提供 API,

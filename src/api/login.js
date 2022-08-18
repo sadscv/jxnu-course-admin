@@ -10,7 +10,8 @@ const userApi = {
   SendSmsErr: '/account/sms_err',
   // get my info
   UserInfo: '/user/info',
-  UserMenu: '/user/nav'
+  UserMenu: '/menu/get-menu-list'
+  // UserMenu: '/user/nav'
 }
 
 /**
@@ -19,7 +20,10 @@ const userApi = {
  *     username: '',
  *     password: '',
  *     remember_me: true,
- *     captcha: '12345'
+ *     captcha: '12345s
+(
+    select * from table1 where name like 'abc%'
+)'
  * }
  * @param parameter
  * @returns {*}
