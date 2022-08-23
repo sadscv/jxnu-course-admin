@@ -10,6 +10,9 @@ export const LookupPanelMixin = {
     }
   },
   mounted () {
+    // this.worker = new Worker('../workers/filter.worker.js')
+    // console.log(this.worker)
+    // this.promiseWorker = new PromiseWorker(this.worker)
     this.promiseWorker = new PromiseWorker(new Worker('../workers/filter.js', { type: 'module' }))
     this.filter(this.$refs.conditions.conditions).then((rows) => {
       this.rows = rows

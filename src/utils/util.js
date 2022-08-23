@@ -93,3 +93,27 @@ export function scorePassword (pass) {
 
   return parseInt(score)
 }
+
+const periodsCache = {}
+
+export function getPeriods (str) {
+  if (periodsCache.hasOwnProperty(str)) {
+    return periodsCache[str]
+  } else {
+    const pattern = /([一二三四五六七])(\d+)(?:-(\d+))?/g
+    const result = []
+    let execResult = pattern.exec(str)
+    while (execResult !== null) {
+      const from = parseInt(execResult[2]); const to = execResult[3] != null ? parseInt(execResult[3]) : from
+      if (from >= 1 && from <= 13 && to >= 1 && to <= 13 && from <= to) {
+        for (let i = from; i <= to; i++) {
+          // e.g. [row(2),column(3),is_start(true),span(2)]
+          result.push([i - 1, ['一', '二', '三', '四', '五', '六', '七'].indexOf(execResult[1]), i === from, to - from + 1])
+        }
+      }
+      execResult = pattern.exec(str)
+    }
+    periodsCache[str] = result
+    return periodsCache[str]
+  }
+}

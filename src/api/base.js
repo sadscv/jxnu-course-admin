@@ -3,7 +3,8 @@ import request from '@/utils/request'
 
 const baseApi = {
   college: '/base/college',
-  info: '/base/info'
+  info: '/base/info',
+  AllCourse: '/all_classes'
 }
 
 export default baseApi
@@ -21,6 +22,16 @@ export function getCollegeList () {
 export function getAllInfo () {
   return request({
     url: baseApi.info,
+    method: 'get',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}
+
+export function getAllCourseInfo () {
+  return request({
+    url: baseApi.AllCourse,
     method: 'get',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'

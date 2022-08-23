@@ -76,17 +76,6 @@
               已选
             </small>
           </template>
-          <!--suppress JSUnresolvedVariable, ES6ModulesDependencies -->
-          <!--<a-button-->
-          <!--v-else-if="class_time_info.canPreview"-->
-          <!--class="lookup-class-time-preview"-->
-          <!--type="link"-->
-          <!--shape="circle"-->
-          <!--icon="eye"-->
-          <!--:disabled="storageBusy"-->
-          <!--@mouseenter="previewClass(class_time_info.row)"-->
-          <!--@mouseleave="cancelPreviewClass(class_time_info.row)"-->
-          <!--/>-->
           <br v-if="$store.getters.extra(class_time_info.key).limitations.length > 0" />
           <a-tag
             v-for="(limitation, index) in $store.getters.extra(class_time_info.key).limitations"
@@ -191,6 +180,9 @@
       NumberCapacity,
       LookupConditions
     },
+    created () {
+      this.LoadAllCourses()
+    },
     methods: {
       handleClassCardClick (classId) {
         window.console.log(classId)
@@ -211,10 +203,35 @@
           })
         }
       )
+    },
+    updateData: function () {
+      // const hide = this.$message.loading('正在检查数据更新...', 0);
+      this.$store.dispatch('checkUpdateAllInfos').then((data) => {
+        if (data != null) {
+        } else {
+          this.$message.error('未获取到课程数据，请刷新页面重试！', 30)
+        }
+      }).catch(() => {
+        this.$message.error('更新课程数据时出错，请刷新页面重试！', 30)
+        this.$store.commit('LOADED', true)
+      })
+    },
+    LoadAllCourses: function () {
+      // const hide = this.$message.loading('正在检查数据更新...', 0);
+      this.$store.dispatch('updateAllCoursesInfo').then((data) => {
+        if (data != null) {
+        } else {
+          this.$message.error('未获取到基础数据，请刷新页面重试！', 30)
+        }
+      }).catch(() => {
+        this.$message.error('更新课程aaa数据时出错，请刷新页面重试！', 30)
+        this.$store.commit('LOADED', true)
+      })
     }
     },
     mixins: [introductionOpenerMixin, conflictSolvingMixin, LookupPanelMixin]
   }
+
 </script>
 
 <style scoped>

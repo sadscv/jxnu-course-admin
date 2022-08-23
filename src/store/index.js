@@ -10,9 +10,10 @@ import user from './modules/user'
 // dynamic router permission control (Experimental)
 import permission from './modules/async-router'
 import getters from './getters'
-import { getAllInfo } from '@/api/base'
+import { getAllCourseInfo, getAllInfo } from '@/api/base'
 import moment from 'moment'
 import storage from 'store'
+// import axios from 'axios'
 
 Vue.use(Vuex)
 
@@ -32,6 +33,7 @@ export default new Vuex.Store({
     allClassrooms: {},
     allTeachers: {},
     allColleges: {},
+    allCourses: null,
     usedClassrooms: {},
     appliedClassrooms: {},
     allClassroomHash: null,
@@ -69,6 +71,9 @@ export default new Vuex.Store({
     },
     ALL_COLLEGES (state, value) {
       state.allColleges = value
+    },
+    ALL_COURSES (state, value) {
+      state.allCourses = value
     },
     APPLIED_CLASSROOMS (state, value) {
       state.appliedClassrooms = value
@@ -126,6 +131,21 @@ export default new Vuex.Store({
           reject()
         })
       })
+    },
+    updateAllCoursesInfo: function (context) {
+      return new Promise((resolve, reject) => {
+        getAllCourseInfo().then((response) => {
+          context.commit('ALL_COURSES', response)
+          const task = []
+          task.push(storage.set('allCourses', response))
+          Promise.all(task).then(() => {
+            resolve('1')
+          }).catch(() => {
+          // eslint-disable-next-line prefer-promise-reject-errors
+            reject()
+        })
+      })
+    })
     }
   },
   getters
