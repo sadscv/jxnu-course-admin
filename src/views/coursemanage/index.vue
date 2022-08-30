@@ -29,139 +29,63 @@
       </a-table-column>
       <a-table-column title="班级" data-index="classes">
         <template v-slot="classes">
-          <a-popover title="点击进入该班级课表" >
-            <template slot="content" v-for="i in classes.originClass.length" >
-              <a :key="i" slot="content" @click="handleClassCardClick(classes.originClassId[i-1])">
-                {{ classes.originClass[i-1] }}
-                <br/>
-              </a>
-            </template>
-            <a>
-              <strong>{{ classes.name }}</strong>
-            </a>
-          </a-popover>
-          <!--</a>-->
+          <a>
+            <strong>{{ classes.name }}</strong>
+          </a>
           <br />
           <small class="id-info">{{ classes.id }}</small>
         </template>
       </a-table-column>
       <a-table-column title="教师" data-index="teacher">
         <template v-slot="teacher">
-          {{ teacher.name }}
+          <a>
+            <strong>{{ teacher.name }}</strong>
+          </a>
           <br /><small class="id-info teacher-id-info">{{ teacher.id }}</small>
-          <a-button
-            class="lookup-class-time-preview"
-            type="link"
-            shape="circle"
-            icon="eye"
-            :disabled="storageBusy"
-            @mouseenter="previewTeacherClasses(teacher.id)"
-            @mouseleave="cancelPreviewTeacherClasses(teacher.id)"
-          />
-
         </template>
       </a-table-column>
       <a-table-column title="上课时间" data-index="class_time_info">
         <template v-slot="class_time_info">
           {{ class_time_info.row['class_time'] }}
-          <!--suppress JSUnresolvedVariable, ES6ModulesDependencies -->
-          <!--<template v-if="Object.keys(class_time_info.conflicts).length > 0">-->
-          <!--<br /><small class="conflict-info">时间冲突</small>-->
-          <!--</template>-->
-          <!--suppress JSUnresolvedVariable, ES6ModulesDependencies -->
-          <template v-if="class_time_info.isSelected">
-            <br />
-            <small class="selected-info">
-              <a-icon type="check-circle" theme="twoTone" two-tone-color="#52c41a" />
-              已选
-            </small>
-          </template>
-          <br v-if="$store.getters.extra(class_time_info.key).limitations.length > 0" />
-          <a-tag
-            v-for="(limitation, index) in $store.getters.extra(class_time_info.key).limitations"
-            class="limitation-tag"
-            :color="getLimitationColor(limitation)"
-            :key="index"
-          >
-            {{ limitation }}
-          </a-tag>
         </template>
       </a-table-column>
-      <a-table-column title="人数" data-index="number">
-        <template v-slot="number">
-          <NumberCapacity :class-key="number.key" />
+
+      <a-table-column title="地点" data-index="classroom">
+        <template v-slot="classroom">
+          {{ classroom.classroom_id }}
         </template>
       </a-table-column>
-      <a-table-column title="地点" data-index="venue">
+      <a-table-column title="备注" data-index="venue">
         <template v-slot="venue">
-          {{ venue.campus }}<br />
-          <small class="detail-venue">{{ $store.getters.extra(venue.key).venue }}</small>
+          <small class="detail-venue">无</small>
         </template>
       </a-table-column>
       <!--suppress HtmlDeprecatedAttribute -->
-      <a-table-column data-index="action" width="160px">
+      <a-table-column data-index="action" width="1px">
         <div slot="title" class="about-data-wrapper">
           <a-popover placement="leftBottom">
             <div slot="content" class="about-data">
-              所有数据<strong>【非实时】</strong>，视情况可能存在高达数日的误差，仅供参考。<br />
-              更新时间：
-              <a-tag>
-                <a-icon type="clock-circle" />
-                <a-divider type="vertical" />
-                <span>{{ new Date($store.state.allClassesExtraUpdateTime).toLocaleString() }}</span>
-              </a-tag>
-              数据HASH：
-              <a-tag>
-                <a-icon type="tag" />
-                <a-divider type="vertical" />
-                <span>{{ $store.state.allClassesHash }}</span>
-              </a-tag>
+              * 仅限在教学时间不变情况下的教学场地调整报备<br />
+              * <strong>教学时间变更请提交调停课申请表</strong>
             </div>
             <a-button size="small" type="link" icon="info-circle">说明</a-button>
           </a-popover>
         </div>
         <template v-slot="action">
-          <!--suppress JSUnresolvedVariable, ES6ModulesDependencies -->
-          <a-dropdown-button
-            v-if="!action.isReserved"
-            type="primary"
-            :disabled="storageBusy"
-            @click="reserveClass(action.row, false)"
-          >
-            <a-icon type="plus-circle" />
-            待排
-            <a-menu slot="overlay">
-              <!--suppress JSUnresolvedVariable, ES6ModulesDependencies -->
-              <a-menu-item @click="reserveClass(action.row, true, action.conflicts)">
-                <template v-if="Object.keys(action.conflicts).length > 0">加入待排并选择，需解决冲突问题...</template>
-                <template v-else>加入待排并选择</template>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown-button>
-          <!--suppress JSUnresolvedVariable, ES6ModulesDependencies -->
-          <a-dropdown-button
-            v-else
-            type="dashed"
-            :disabled="storageBusy"
-            @click="removeReservedClass(action.row)"
-          >
-            <a-icon type="minus-circle" />
-            待排
-            <a-menu slot="overlay">
-              <!--suppress JSUnresolvedVariable, ES6ModulesDependencies -->
-              <a-menu-item v-if="action.isSelected" @click="unselectClass(action.row)">
-                回到待排状态
-              </a-menu-item>
-              <!--suppress JSUnresolvedVariable, ES6ModulesDependencies -->
-              <a-menu-item v-else @click="selectClass(action.row, action.conflicts)">
-                <template v-if="Object.keys(action.conflicts).length > 0">选择此待排课，需要解决冲突问题...</template>
-                <template v-else>选择此待排课</template>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown-button>
+          <PopupPanel
+            :course-info="getInfo(action.row)"
+          />
+<!--          <a-dropdown-button-->
+<!--            type="primary"-->
+<!--            :disabled="storageBusy"-->
+<!--            @click="updateCourseInfo(action.row, false)"-->
+<!--          >-->
+<!--          </a-dropdown-button>-->
         </template>
       </a-table-column>
+
     </a-table>
+
   </div>
 </template>
 
@@ -172,16 +96,20 @@
   import { LookupPanelMixin } from '@/mixins/LookupPanel'
   import { introductionOpenerMixin } from '@/mixins/common/introductionOpener'
   import ATableColumn from 'ant-design-vue/es/table/Column'
+  import PopupPanel from '@/components/SubmitPanel/PopupPanel'
 
   export default {
     name: 'LookupPanel',
     components: {
         ATableColumn,
       NumberCapacity,
-      LookupConditions
+      LookupConditions,
+      PopupPanel
     },
     created () {
-      this.LoadAllCourses()
+      this.$nextTick(() => {
+        this.LoadAllCourses()
+       })
     },
     methods: {
       handleClassCardClick (classId) {
@@ -204,29 +132,8 @@
         }
       )
     },
-    updateData: function () {
-      // const hide = this.$message.loading('正在检查数据更新...', 0);
-      this.$store.dispatch('checkUpdateAllInfos').then((data) => {
-        if (data != null) {
-        } else {
-          this.$message.error('未获取到课程数据，请刷新页面重试！', 30)
-        }
-      }).catch(() => {
-        this.$message.error('更新课程数据时出错，请刷新页面重试！', 30)
-        this.$store.commit('LOADED', true)
-      })
-    },
-    LoadAllCourses: function () {
-      // const hide = this.$message.loading('正在检查数据更新...', 0);
-      this.$store.dispatch('updateAllCoursesInfo').then((data) => {
-        if (data != null) {
-        } else {
-          this.$message.error('未获取到基础数据，请刷新页面重试！', 30)
-        }
-      }).catch(() => {
-        this.$message.error('更新课程aaa数据时出错，请刷新页面重试！', 30)
-        this.$store.commit('LOADED', true)
-      })
+    getInfo (row) {
+      return row
     }
     },
     mixins: [introductionOpenerMixin, conflictSolvingMixin, LookupPanelMixin]

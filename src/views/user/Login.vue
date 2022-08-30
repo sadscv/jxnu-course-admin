@@ -114,6 +114,7 @@ export default {
   },
   created () {
     this.updateData()
+    this.LoadAllCourses()
   },
   methods: {
     ...mapActions(['Login', 'Logout']),
@@ -218,6 +219,18 @@ export default {
         }
       }).catch(() => {
         this.$message.error('更新课程数据时出错，请刷新页面重试！', 30)
+        this.$store.commit('LOADED', true)
+      })
+    },
+    LoadAllCourses: function () {
+      // const hide = this.$message.loading('正在检查数据更新...', 0);
+      this.$store.dispatch('updateAllCoursesInfo').then((data) => {
+        if (data != null) {
+        } else {
+          this.$message.error('未获取到基础数据，请刷新页面重试！', 30)
+        }
+      }).catch(() => {
+        this.$message.error('更新课程aaa数据时出错，请刷新页面重试！', 30)
         this.$store.commit('LOADED', true)
       })
     }

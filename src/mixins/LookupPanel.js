@@ -10,13 +10,13 @@ export const LookupPanelMixin = {
     }
   },
   mounted () {
-    // this.worker = new Worker('../workers/filter.worker.js')
-    // console.log(this.worker)
-    // this.promiseWorker = new PromiseWorker(this.worker)
+    console.log('mount')
     this.promiseWorker = new PromiseWorker(new Worker('../workers/filter.js', { type: 'module' }))
-    this.filter(this.$refs.conditions.conditions).then((rows) => {
-      this.rows = rows
-    })
+    setTimeout(() => {
+      this.filter(this.$refs.conditions.conditions).then((rows) => {
+        this.rows = rows
+      })
+      }, 2000)
   },
   watch: {
     '$store.state.allClasses' () {
@@ -55,8 +55,9 @@ export const LookupPanelMixin = {
       }, delay)
     },
     filter (conditions) {
+      const state = JSON.parse(JSON.stringify(this.$store.state))
       return this.promiseWorker.postMessage({
-        allClasses: this.$store.state.allCourses,
+        allClasses: this.$store.state.course.allCourses,
         reservedClasses: this.$store.state.reservedClasses,
         selectedClasses: this.$store.state.selectedClasses,
         scheduleTableRows: this.$store.getters.scheduleTableRows,
@@ -76,61 +77,19 @@ export const LookupPanelMixin = {
         this.$store.dispatch(select ? 'reserveClassThenSelect' : 'reserveClass', data)
       }
     },
-    removeReservedClass (data) {
-      this.storageBusy = true
-      this.$store.dispatch('removeReservedClass', data)
+    updateCourseInfo(data, select) {
     },
-    selectClass (data, conflicts) {
-      if (Object.keys(conflicts).length > 0) {
-        this.showConflictsSolvingDialog(data, conflicts)
-      } else {
-        this.storageBusy = true
-        this.$store.dispatch('selectClass', data)
-      }
-    },
-    unselectClass (data) {
-      this.storageBusy = true
-      this.$store.dispatch('unselectClass', data)
-    },
-    previewTeacherClasses (teacherId) {
-      window.console.log(teacherId)
-      if (!this.storageBusy) {
-        const condition = {
-          search: {
-            'course_id': '',
-            'course_name': '',
-            'class_name': '',
-            'credit': '',
-            'teacher_id': teacherId,
-            'teacher_name': '',
-            'class_time': '',
-            'campus': ''
-          },
-          filterConflicts: false,
-          displayOption: 0,
-          number: ''
+    LoadAllCourses: function () {
+      // const hide = this.$message.loading('正在检查数据更新...', 0);
+      this.$store.dispatch('updateAllCoursesInfo').then((data) => {
+        if (data != null) {
+        } else {
+          this.$message.error('未获取到基础数据，请刷新页面重试！', 30)
         }
-        const previewCourses = []
-        this.filter(condition).then((courses) => {
-          this.storageBusy = false
-          courses.forEach((course) => {
-            previewCourses.push({
-              courseId: course['course_id'],
-              courseName: course['course_name'],
-              classId: course['teacher_id'],
-              teacherName: course['teacher_name'],
-              classTime: course['class_time'],
-              classList: this.$store.state.classList
-            })
-          })
-        })
-        this.$store.commit('PREVIEW_CLASS', previewCourses)
-      }
-    },
-    cancelPreviewTeacherClasses (row) {
-      if (this.$store.state.previewClass !== [] && row) {
-        this.$store.commit('PREVIEW_CLASS', null)
-      }
+      }).catch(() => {
+        this.$message.error('更新课程aaa数据时出错，请刷新页面重试！', 30)
+        this.$store.commit('LOADED', true)
+      })
     },
     getLimitationColor (limitation) {
       switch (limitation) {

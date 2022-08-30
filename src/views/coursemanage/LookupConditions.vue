@@ -25,26 +25,26 @@
       <a-form-item label="上课时间">
         <a-input class="w-100px" v-model="conditions.search['class_time']" allow-clear />
       </a-form-item>
-      <a-form-item label="校区">
-        <a-select v-model="conditions.search['campus']">
-          <a-select-option value="">全部</a-select-option>
-          <a-select-option value="瑶湖">瑶湖</a-select-option>
-          <a-select-option value="青山湖">青山湖</a-select-option>
-        </a-select>
-      </a-form-item>
-      <a-form-item label="筛除时间冲突选项">
-        <a-switch v-model="conditions.filterConflicts" checked-children="是" un-checked-children="否" />
-      </a-form-item>
-      <a-form-item label="容量不高于">
-        <a-input-number class="w-80px" v-model.number="conditions.number" placeholder="不限" :min="0" :max="9999" />
-      </a-form-item>
-      <a-form-item label="显示选项">
-        <a-radio-group v-model="conditions.displayOption">
-          <a-radio :value="0">全部</a-radio>
-          <a-radio :value="1">只显示未待选</a-radio>
-          <a-radio :value="2">只显示已待选</a-radio>
-        </a-radio-group>
-      </a-form-item>
+<!--      <a-form-item label="校区">-->
+<!--        <a-select v-model="conditions.search['campus']">-->
+<!--          <a-select-option value="">全部</a-select-option>-->
+<!--          <a-select-option value="瑶湖">瑶湖</a-select-option>-->
+<!--          <a-select-option value="青山湖">青山湖</a-select-option>-->
+<!--        </a-select>-->
+<!--      </a-form-item>-->
+<!--      <a-form-item label="筛除时间冲突选项">-->
+<!--        <a-switch v-model="conditions.filterConflicts" checked-children="是" un-checked-children="否" />-->
+<!--      </a-form-item>-->
+<!--      <a-form-item label="容量不高于">-->
+<!--        <a-input-number class="w-80px" v-model.number="conditions.number" placeholder="不限" :min="0" :max="9999" />-->
+<!--      </a-form-item>-->
+<!--      <a-form-item label="显示选项">-->
+<!--        <a-radio-group v-model="conditions.displayOption">-->
+<!--          <a-radio :value="0">全部</a-radio>-->
+<!--          <a-radio :value="1">只显示未待选</a-radio>-->
+<!--          <a-radio :value="2">只显示已待选</a-radio>-->
+<!--        </a-radio-group>-->
+<!--      </a-form-item>-->
     </a-form>
   </a-card>
 </template>
