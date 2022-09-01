@@ -37,7 +37,7 @@
             </a-table-column>
             <a-table-column title="courseInfo" data-index="courseInfo">
               <template v-slot="courseInfo">
-                <a-select v-model="testData" style="width:120px"></a-select>
+              <testPanel></testPanel>
               </template>
             </a-table-column>
           </a-table>
@@ -48,8 +48,14 @@
 </template>
 
 <script>
+import testPanel from '@/components/SubmitPanel/testPanel'
 
+const provinceData = ['Zhejiang', 'Jiangsu']
 export default {
+  name: 'PopupPanel',
+  components: {
+      testPanel
+    },
   data () {
     return {
       visible: false,
@@ -57,7 +63,7 @@ export default {
       college_name: null,
       columnData: null,
       weekUsageList: [],
-      testData: ['123', '435'],
+      testData: provinceData[0],
       labelCol: {
         // style: { width: '150px' },
         xs: { span: 8 },
