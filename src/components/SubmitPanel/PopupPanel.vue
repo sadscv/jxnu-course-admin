@@ -13,14 +13,14 @@
       @cancel="() => { handleCancel() }"
       @ok="() => { handlePush() }"
     >
-      <a-form class="apply-info-wrapper ant-form-item" :form="form" :label-col="labelCol" width="80%" >
+      <a-form class="apply-info-wrapper ant-form-item" :label-col="labelCol" width="80%" >
         <a-form-item label="管理单位" layout="inline"> <a>{{ courseInfo.college }}</a> </a-form-item>
         <a-form-item label="课程名称" layout="inline"> <a>{{ courseInfo.course_name }}</a> </a-form-item>
         <a-form-item label="班级名称" layout="inline"> <a>{{ courseInfo.class_name }}</a> </a-form-item>
         <a-form-item label="任课教师" layout="inline"> <a>{{ courseInfo.teacher_name }}</a> </a-form-item>
         <a-form-item label="开课周次">
           <div>
-            <a-checkable-tag v-for="check in useWeekCheckList" :key="check.key" v-model:checked="check.value" @change="handleChange">{{ check.week }}</a-checkable-tag>
+            <a-checkable-tag v-for="check in weekUsageList" :key="check.key" v-model:checked="check.value" @change="handleChange">{{ check.week }}</a-checkable-tag>
           </div>
         </a-form-item>
         <a-form-item label="">
@@ -32,12 +32,13 @@
             </a-table-column>
             <a-table-column title="开课否" data-index="courseWeek">
               <template v-slot="courseWeek">
-                <a-switch v-model:checked="useWeekCheckList[courseWeek.week].value" />
+                <a-switch v-model:checked="weekUsageList[courseWeek.week].value" />
               </template>
             </a-table-column>
-            <a-table-column title="clsAlterInfo" data-index="clsAlterInfo">
-              {{courseInfo}}
-              <a>test</a>
+            <a-table-column title="courseInfo" data-index="courseInfo">
+              <template v-slot="courseInfo">
+                <a-select v-model="testData" style="width:120px"></a-select>
+              </template>
             </a-table-column>
           </a-table>
         </a-form-item>
@@ -52,15 +53,11 @@ export default {
   data () {
     return {
       visible: false,
-      isAdmin: this.$store.state.isAdmin,
-      form: this.$form.createForm(this, { name: 'infoForm' }),
-      currentTeacher: {},
-      colleges: {},
       teacher_id: null,
       college_name: null,
-      ticketId: 0,
       columnData: null,
-      useWeekCheckList: [],
+      weekUsageList: [],
+      testData: ['123', '435'],
       labelCol: {
         // style: { width: '150px' },
         xs: { span: 8 },
@@ -73,28 +70,8 @@ export default {
     }
   },
   created () {
-    const rowsData = []
-    for (let i = 1; i < 18; i++) {
-      rowsData.push({
-        key: i,
-        courseWeek: {
-          week: i - 1,
-          on: true
-        },
-        clsAlterInfo: this.courseInfo
-      })
-    }
-    this.columnData = rowsData
-
-    const checkList = []
-    for (let i = 1; i < 18; i++) {
-      checkList.push({
-        key: `checked${i}`,
-        value: true,
-        week: `第${i}周`
-      })
-    }
-    this.useWeekCheckList = checkList
+    this.initWeekUsageList()
+    this.setColumnData()
   },
   props: {
     selectedDate: {
@@ -106,12 +83,6 @@ export default {
   watch: {
   },
   computed: {
-    // getTimeAndClassroom () {
-    //   return {
-    //     time: this.props.courseInfo.class_time,
-    //     classroom: this.props.courseInfo.classroom
-    //   }.courseInfo()
-    // }
 
   },
   methods: {
@@ -140,7 +111,33 @@ export default {
     handleChange (checked) {
       console.log(checked)
     },
+    setColumnData () {
+      const rowsData = []
+      for (let i = 1; i < 18; i++) {
+        rowsData.push({
+          key: i,
+          courseWeek: {
+            week: i - 1,
+            on: true
+            },
+          courseInfo: this.courseInfo
+          })
+        }
+      this.columnData = rowsData
+    },
+    initWeekUsageList () {
+      const checkList = []
+      for (let i = 1; i < 18; i++) {
+        checkList.push({
+          key: `checked${i}`,
+          value: true,
+          week: `第${i}周`
+        })
+      }
+      this.weekUsageList = checkList
+    }
   }
+
 }
 </script>
 
