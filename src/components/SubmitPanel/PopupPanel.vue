@@ -10,14 +10,17 @@
       :visible="visible"
       title="提交申请"
       okText="提交申请"
+      width="900px"
+      layout="inline"
       @cancel="() => { handleCancel() }"
       @ok="() => { handlePush() }"
     >
-      <a-form class="apply-info-wrapper ant-form-item" :label-col="labelCol" width="80%" >
-        <a-form-item label="管理单位" layout="inline"> <a>{{ courseInfo.college }}</a> </a-form-item>
-        <a-form-item label="课程名称" layout="inline"> <a>{{ courseInfo.course_name }}</a> </a-form-item>
+      <a-form class="apply-info-wrapper ant-form-item" :label-col="labelCol" layout="inline">
+        <a-form-item label="管理单位" layout="horizontal"> <a>{{ courseInfo.college }}</a> </a-form-item>
+        <a-form-item label="课程名称" layout="horizontal"> <a>{{ courseInfo.course_name }}</a> </a-form-item>
         <a-form-item label="班级名称" layout="inline"> <a>{{ courseInfo.class_name }}</a> </a-form-item>
         <a-form-item label="任课教师" layout="inline"> <a>{{ courseInfo.teacher_name }}</a> </a-form-item>
+
         <a-form-item label="开课周次">
           <div>
             <a-checkable-tag v-for="check in weekUsageList" :key="check.key" v-model:checked="check.value" @change="handleChange">{{ check.week }}</a-checkable-tag>
@@ -32,12 +35,12 @@
             </a-table-column>
             <a-table-column title="开课否" data-index="courseWeek">
               <template v-slot="courseWeek">
-                <a-switch v-model:checked="weekUsageList[courseWeek.week].value" />
+                <a-switch v-model:checked="weekUsageList[courseWeek.week].value" size="small"/>
               </template>
             </a-table-column>
-            <a-table-column title="courseInfo" data-index="courseInfo">
+            <a-table-column title="courseInfo"  data-index="courseInfo">
               <template v-slot="courseInfo">
-              <testPanel></testPanel>
+                <courseTimeTable></courseTimeTable>
               </template>
             </a-table-column>
           </a-table>
@@ -48,13 +51,14 @@
 </template>
 
 <script>
-import testPanel from '@/components/SubmitPanel/testPanel'
+
+import courseTimeTable from '@/components/SubmitPanel/courseTimeTable'
 
 const provinceData = ['Zhejiang', 'Jiangsu']
 export default {
   name: 'PopupPanel',
   components: {
-      testPanel
+      courseTimeTable
     },
   data () {
     return {
@@ -66,12 +70,12 @@ export default {
       testData: provinceData[0],
       labelCol: {
         // style: { width: '150px' },
-        xs: { span: 8 },
-        sm: { span: 4 }
+        // xs: { span: 8 },
+        // sm: { span: 4 }
         },
       wrapperCol: {
         xs: { span: 12 },
-        sm: { span: 12 }
+        sm: { span: 16 }
       }
     }
   },
@@ -126,7 +130,7 @@ export default {
             week: i - 1,
             on: true
             },
-          courseInfo: this.courseInfo
+          courseInfo: null
           })
         }
       this.columnData = rowsData
