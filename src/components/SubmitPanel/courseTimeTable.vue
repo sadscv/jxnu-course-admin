@@ -1,97 +1,51 @@
 <template>
-  <a-table :data-source="rawData" size="small" :showHeader="false" :pagination="false" >
+  <a-table :data-source="tableData" size="small" :showHeader="false" :pagination="false" >
     <a-table-column key="firstName" title="first name" data-index="firstName">
       First Name
     </a-table-column>
-    <a-table-column key="lastName" title="Last Name" data-index="lastName" />
-    <a-table-column key="age" title="Age" data-index="age" />
-    <a-table-column key="address" title="Address" data-index="address" />
+    <a-table-column key="week" title="Last Name" data-index="week" />
+    <a-table-column key="date" title="Date" data-index="date" />
+    <a-table-column key="oldClassroom" title="教室" data-index="oldClassroom" />
     <a-table-column key="tags" title="Tags" data-index="tags">
       <template #default="tags">
-        <a-input
-          v-if="inputVisible"
-          ref="inputRef"
-          type="text"
-          size="small"
-          :style="{ width: '78px' }"
-          v-model:value="inputValue"
-          @blur="handleInputConfirm"
-          @keyup.enter="handleInputConfirm"
-        />
-        <a-tag v-else @click="showInput" style="background: #fff; border-style: dashed">
-          <plus-outlined />
-          New Tag
-        </a-tag>
+        <!--        <a-input-->
+        <!--          v-if="inputVisible"-->
+        <!--          ref="inputRef"-->
+        <!--          type="text"-->
+        <!--          size="small"-->
+        <!--          :style="{ width: '78px' }"-->
+        <!--          v-model:value="inputValue"-->
+        <!--          @blur="handleInputConfirm"-->
+        <!--          @keyup.enter="handleInputConfirm"-->
+        <!--        />-->
+        <!--        <a-tag v-else @click="showInput" style="background: #fff; border-style: dashed">-->
+        <!--          <plus-outlined />-->
+        <!--          New Tag-->
+        <!--        </a-tag>-->
         <span>
           <a-tag v-for="tag in tags" :key="tag" closable color="blue">{{ tag }}</a-tag>
         </span>
       </template>
     </a-table-column>
-    <a-table-column key="action" title="Action">
+    <a-table-column key="newClassroom" title="Action">
       <template #default="record ">
-        <a-input-search size="middle" enter-button="变更教室" allow-clear @search="onChangeClassroom">
+        <a-input-search
+          size="default" enter-button="变更教室" placeholder="this.rawData[0]" v-model="newClassroom"  allow-clear >
         </a-input-search>
       </template>
     </a-table-column>
   </a-table>
 </template>
 <script>
-import { DownOutlined } from '@ant-design/icons-vue'
 
-const columns = [
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    slots: {
-      customRender: 'name'
-    }
-  },
-  {
-    title: 'Age',
-    dataIndex: 'age'
-  },
-  {
-    title: 'Address',
-    dataIndex: 'address'
-  }
-]
-
-const rawdata = [
-  {
-    key: '1',
-    firstName: 'John',
-    lastName: 'Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-    tags: ['nice', 'developer']
-  },
-  {
-    key: '2',
-    firstName: 'Jim',
-    lastName: 'Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-    tags: ['loser']
-  },
-  {
-    key: '3',
-    firstName: 'Joe',
-    lastName: 'Black',
-    age: 32,
-    address: 'Sidney No. 1 Lake Park',
-    tags: ['cool', 'teacher']
-  }
-]
 
 export default ({
   components: {
-    DownOutlined
   },
   data () {
     return {
       pagination: false,
-      rawData: rawdata,
-      columns: columns,
+      tableData: null,
       rowSelection: {
       onChange: (selectedRowKeys, selectedRows) => {
         console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
@@ -104,7 +58,25 @@ export default ({
     }
     }
   },
-  computed () {}
+  created () {
+    this.processWeekDetail = function () {
+      console.log(Object.values(this.weekDetail))
+      this.tableData = Object.values(this.weekDetail)
+      this.rawData = this.weekDetail
+    }
+    this.processWeekDetail()
+  },
+  props: {
+    weekDetail: {
+    }
+  },
+  computed () {
+  },
+  methods: {
+    onChangeClassroom () {
+      console.log('fuck')
+    }
+  }
 
 })
 </script>

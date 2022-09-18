@@ -1,11 +1,12 @@
 <template>
   <div ref="wrapper">
-    <a-dropdown-button
+    <a-button
       type="primary"
+      :loading="loading"
       @click="showModal"
     >
       变更申请
-    </a-dropdown-button>
+    </a-button>
     <a-modal
       :visible="visible"
       title="提交申请"
@@ -27,20 +28,20 @@
           </div>
         </a-form-item>
         <a-form-item label="">
-          <a-table :data-source="columnData" size="small">
+          <a-table :data-source="columnData" size="small" :pagination="{ pageSize: this.pageSize }">
             <a-table-column title="周次" data-index="key">
               <template v-slot="key">
                 第{{ key }}周
               </template>
             </a-table-column>
-            <a-table-column title="开课否" data-index="courseWeek">
+            <a-table-column title="开课" data-index="courseWeek">
               <template v-slot="courseWeek">
                 <a-switch v-model:checked="weekUsageList[courseWeek.week].value" size="small"/>
               </template>
             </a-table-column>
-            <a-table-column title="courseInfo"  data-index="courseInfo">
+            <a-table-column title="课程信息" data-index="courseInfo">
               <template v-slot="courseInfo">
-                <courseTimeTable></courseTimeTable>
+                <courseTimeTable :weekDetail="getWeekStatus(courseInfo.key)"></courseTimeTable>
               </template>
             </a-table-column>
           </a-table>
@@ -53,8 +54,8 @@
 <script>
 
 import courseTimeTable from '@/components/SubmitPanel/courseTimeTable'
+import { getCourseStatus } from '@/api/manage'
 
-const provinceData = ['Zhejiang', 'Jiangsu']
 export default {
   name: 'PopupPanel',
   components: {
@@ -62,12 +63,13 @@ export default {
     },
   data () {
     return {
+      loading: false,
       visible: false,
       teacher_id: null,
       college_name: null,
       columnData: null,
+      pageSize: 10,
       weekUsageList: [],
-      testData: provinceData[0],
       labelCol: {
         // style: { width: '150px' },
         // xs: { span: 8 },
@@ -81,7 +83,6 @@ export default {
   },
   created () {
     this.initWeekUsageList()
-    this.setColumnData()
   },
   props: {
     selectedDate: {
@@ -93,11 +94,23 @@ export default {
   watch: {
   },
   computed: {
-
   },
   methods: {
     showModal () {
-        this.visible = true
+      const _this = this
+      this.loading = true
+      const params = {
+        'course_id': _this.courseInfo.course_id,
+        'class_id': _this.courseInfo.class_id
+      }
+      getCourseStatus(params).then(res => {
+        this.setCourseInfo(res.result)
+      }).catch(() => {
+        _this.$message.error('内部错误，请重试', 10)
+      }).finally(() => {
+        _this.loading = false
+        _this.visible = true
+      })
     },
     handleCancel () {
       this.visible = false
@@ -121,19 +134,44 @@ export default {
     handleChange (checked) {
       console.log(checked)
     },
-    setColumnData () {
-      const rowsData = []
+    setCourseInfo (CourseInfo) {
+      const processed = []
+      this.pageSize = parseInt(9 /(CourseInfo.length/17))
       for (let i = 1; i < 18; i++) {
-        rowsData.push({
-          key: i,
-          courseWeek: {
-            week: i - 1,
-            on: true
-            },
-          courseInfo: null
-          })
+        processed.push('1')
         }
-      this.columnData = rowsData
+      CourseInfo.forEach((row) => {
+        // console.log(processed[parseInt(row.周次号) - 1])
+        if (processed[parseInt(row.周次号) - 1] === '1') {
+          processed[parseInt(row.周次号) - 1] = {
+            key: row.周次号,
+            courseWeek: {
+              week: row.周次号 - 1,
+              on: false
+            },
+            courseInfo: {
+              key: row.周次号
+            },
+            courseDetail: {},
+            weekStatus: {
+            }
+          }
+        }
+        const infoKey = row.星期号 + row.节次号
+        console.log(row)
+        processed[parseInt(row.周次号) - 1]['weekStatus'][infoKey] = {
+          key: infoKey,
+          week: row.meta.week,
+          date: row.meta.date,
+          oldClassroom: row.meta.classroom,
+          newClassroom: row.meta.classroom
+        }
+      })
+      console.log(processed)
+      this.columnData = processed
+    },
+    getWeekStatus (week) {
+      return this.columnData[parseInt(week) - 1]['weekStatus']
     },
     initWeekUsageList () {
       const checkList = []
@@ -145,6 +183,9 @@ export default {
         })
       }
       this.weekUsageList = checkList
+    },
+    fetchData () {
+
     }
   }
 

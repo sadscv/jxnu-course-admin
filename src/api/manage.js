@@ -7,7 +7,8 @@ const api = {
   service: '/service',
   permission: '/permission',
   permissionNoPager: '/permission/no-pager',
-  orgTree: '/org/tree'
+  orgTree: '/org/tree',
+  courseStatus: 'course_status'
 }
 
 export default api
@@ -67,5 +68,13 @@ export function saveSub (sub) {
     url: '/sub',
     method: sub.id === 0 ? 'post' : 'put',
     data: sub
+  })
+}
+
+export function getCourseStatus (parameter) {
+  return request({
+    url: api.courseStatus,
+    method: 'get',
+    params: parameter
   })
 }
