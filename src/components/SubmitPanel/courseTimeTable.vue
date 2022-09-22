@@ -27,13 +27,13 @@
         </span>
       </template>
     </a-table-column>
-    <a-table-column key="newClassroom" title="Action">
-      <template #default="record " >
+    <a-table-column key="index" title="Action" data-index="index">
+      <template v-slot="index" >
+        {{ tableData[index].newClassroom }}
         <a-input-search
           size="default"
           enter-button="变更教室"
-          placeholder="this.rawData[0]"
-          v-model="key"
+          v-model="tableData[index].newClassroom"
           allow-clear >
         </a-input-search>
       </template>
@@ -49,6 +49,7 @@ export default ({
     return {
       pagination: false,
       tableData: null,
+      test: null,
       rowSelection: {
       onChange: (selectedRowKeys, selectedRows) => {
         console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
@@ -63,9 +64,14 @@ export default ({
   },
   created () {
     this.processWeekDetail = function () {
-      console.log(Object.values(this.weekDetail))
-      this.tableData = Object.values(this.weekDetail)
-      this.rawData = this.weekDetail
+      const weekDetail = this.weekDetail
+      const tableData = []
+      Object.keys(weekDetail).forEach(function (key, index) {
+        weekDetail[key].index = index
+        console.log(key, weekDetail[key].index)
+        tableData.push(weekDetail[key])
+      })
+      this.tableData = tableData
     }
     this.processWeekDetail()
   },
@@ -74,9 +80,12 @@ export default ({
     }
   },
   watch: {
-    tableData () {
-      this.$emit('syncCourseTime', this.tableData)
-      }
+    tableData: {
+      handler (newData) {
+        this.$emit('syncCourseTime', this.tableData)
+      },
+      deep: true
+    }
   },
   computed () {
   },
@@ -86,6 +95,9 @@ export default ({
     },
     rowClassNameFn (row, rowIndex) {
       row.index = rowIndex
+    },
+    getIndex (data) {
+      return data.index
     }
   }
 
