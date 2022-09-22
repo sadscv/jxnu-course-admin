@@ -1,5 +1,5 @@
 <template>
-  <a-table :data-source="tableData" size="small" :showHeader="false" :pagination="false" >
+  <a-table :data-source="tableData" size="small" :row-class-name="rowClassNameFn" :showHeader="false" :pagination="false" >
     <a-table-column key="firstName" title="first name" data-index="firstName">
       First Name
     </a-table-column>
@@ -28,16 +28,19 @@
       </template>
     </a-table-column>
     <a-table-column key="newClassroom" title="Action">
-      <template #default="record ">
+      <template #default="record " >
         <a-input-search
-          size="default" enter-button="变更教室" placeholder="this.rawData[0]" v-model="newClassroom"  allow-clear >
+          size="default"
+          enter-button="变更教室"
+          placeholder="this.rawData[0]"
+          v-model="key"
+          allow-clear >
         </a-input-search>
       </template>
     </a-table-column>
   </a-table>
 </template>
 <script>
-
 
 export default ({
   components: {
@@ -70,11 +73,19 @@ export default ({
     weekDetail: {
     }
   },
+  watch: {
+    tableData () {
+      this.$emit('syncCourseTime', this.tableData)
+      }
+  },
   computed () {
   },
   methods: {
     onChangeClassroom () {
       console.log('fuck')
+    },
+    rowClassNameFn (row, rowIndex) {
+      row.index = rowIndex
     }
   }
 

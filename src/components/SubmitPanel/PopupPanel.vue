@@ -41,7 +41,7 @@
             </a-table-column>
             <a-table-column title="课程信息" data-index="courseInfo">
               <template v-slot="courseInfo">
-                <courseTimeTable :weekDetail="getWeekStatus(courseInfo.key)"></courseTimeTable>
+                <courseTimeTable @syncCourseTime="setCourseTime" :weekDetail="getWeekStatus(courseInfo.key)"></courseTimeTable>
               </template>
             </a-table-column>
           </a-table>
@@ -136,7 +136,7 @@ export default {
     },
     setCourseInfo (CourseInfo) {
       const processed = []
-      this.pageSize = parseInt(9 /(CourseInfo.length/17))
+      this.pageSize = parseInt(9 / (CourseInfo.length / 17))
       for (let i = 1; i < 18; i++) {
         processed.push('1')
         }
@@ -184,8 +184,8 @@ export default {
       }
       this.weekUsageList = checkList
     },
-    fetchData () {
-
+    setCourseTime (CourseTimeInfo) {
+      console.log(CourseTimeInfo)
     }
   }
 
