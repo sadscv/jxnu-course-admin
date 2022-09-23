@@ -17,8 +17,12 @@
         </a-input-search>
       </template>
     </a-table-column>
-    <a-table-column key="tags" title="Tags" data-index="tags">
-      <template #default="tags">
+    <a-table-column key="tags" title="Tags" data-index="tagList" >
+      <a-tag style="background: #fff; border-style: dashed">
+        候补教室
+        <plus-outlined />
+      </a-tag>
+      <template>
         <a-input
           v-if="inputVisible"
           ref="inputRef"
@@ -29,21 +33,27 @@
           @blur="handleInputConfirm"
           @keyup.enter="handleInputConfirm"
         />
-        <a-tag v-else @click="showInput" style="background: #fff; border-style: dashed">
+        <a-tag v-else @click="clickInput" style="background: #fff; border-style: dashed">
           候补教室
           <plus-outlined />
         </a-tag>
-        <span>
-          <a-tag v-for="tag in tags" :key="tag" closable color="blue">{{ tag }}</a-tag>
-        </span>
+        <!--        <span>-->
+        <!--          <a-tag v-for="tag in tags" :key="tag" closable color="blue">{{ tag }}</a-tag>-->
+        <!--        </span>-->
       </template>
     </a-table-column>
   </a-table>
 </template>
 <script>
+import { PlusOutlined } from '@ant-design/icons-vue'
 
 export default ({
   components: {
+    PlusOutlined
+  },
+  props: {
+    weekDetail: {
+    }
   },
   data () {
     return {
@@ -51,16 +61,16 @@ export default ({
       tableData: null,
       test: null,
       rowSelection: {
-      onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
-      },
+        onChange: (selectedRowKeys, selectedRows) => {
+          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
+        },
 
-      getCheckboxProps: record => ({
-        disabled: record.name === 'Disabled User',
-        // Column configuration not to be checked
-        name: record.name
-      })
-    }
+        getCheckboxProps: record => ({
+          disabled: record.name === 'Disabled User',
+          // Column configuration not to be checked
+          name: record.name
+        })
+      }
     }
   },
   created () {
@@ -69,67 +79,22 @@ export default ({
       const tableData = []
       Object.keys(weekDetail).forEach(function (key, index) {
         weekDetail[key].index = index
-        console.log(key, weekDetail[key].index)
+        weekDetail[key].inputShow = true
+        weekDetail[key].tagList = {
+          tags: weekDetail[key].tags,
+          showInput: true
+        }
         tableData.push(weekDetail[key])
       })
       this.tableData = tableData
     }
     this.processWeekDetail()
   },
-  props: {
-    weekDetail: {
-    }
-  },
-  watch: {
-    tableData: {
-      handler (newData) {
-        this.$emit('syncCourseTime', this.tableData)
-      },
-      deep: true
-    }
-  },
-  computed () {
-  },
-  setup () {
-        const inputRef = ref()
-    const state = reactive({
-      tags: ['Unremovable', 'Tag 2', 'Tag 3Tag 3Tag 3Tag 3Tag 3Tag 3Tag 3'],
-      inputVisible: false,
-      inputValue: ''
-    })
-
-    const handleClose = removedTag => {
-      const tags = state.tags.filter(tag => tag !== removedTag)
-      console.log(tags)
-      state.tags = tags
-    }
-
-    const showInput = () => {
-      state.inputVisible = true
-      nextTick(() => {
-        inputRef.value.focus()
-      })
-    }
-
-    const handleInputConfirm = () => {
-      const inputValue = state.inputValue
-      let tags = state.tags
-
-      if (inputValue && tags.indexOf(inputValue) === -1) {
-        tags = [...tags, inputValue]
-      }
-
-      console.log(tags)
-      Object.assign(state, {
-        tags,
-        inputVisible: false,
-        inputValue: ''
-      })
-    }
-
-    return { ...toRefs(state), handleClose, showInput, handleInputConfirm, inputRef }
-  },
   methods: {
+    clickInput (tagList) {
+      console.log(tagList)
+      tagList.showInput = false
+    },
     onChangeClassroom () {
       console.log('fuck')
     },
@@ -139,7 +104,14 @@ export default ({
     getIndex (data) {
       return data.index
     }
+  },
+  watch: {
+    tableData: {
+      handler (newData) {
+        this.$emit('syncCourseTime', this.tableData)
+      },
+      deep: true
+    }
   }
-
 })
 </script>
