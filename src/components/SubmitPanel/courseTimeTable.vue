@@ -5,7 +5,11 @@
     </a-table-column>
     <a-table-column key="week" title="Last Name" data-index="week" />
     <a-table-column key="date" title="Date" data-index="date" />
-    <a-table-column key="oldClassroom" title="教室" data-index="oldClassroom" />
+    <!--    <a-table-column key="oldClassroom" title="教室" data-index="oldClassroom">-->
+    <!--      <template v-slot="oldClassroom">-->
+    <!--        原教室: <b>{{oldClassroom}}</b>-->
+    <!--      </template>-->
+    <!--    </a-table-column>-->
 
     <a-table-column key="index" title="Action" data-index="index">
       <template v-slot="index" >
@@ -13,6 +17,7 @@
           size="default"
           :style="{ width: '200px' }"
           enter-button="变更教室"
+          @search="onChangeClassroom(index)"
           v-model="tableData[index].newClassroom"
           allow-clear >
         </a-input-search>
@@ -20,26 +25,33 @@
     </a-table-column>
     <a-table-column key="tagList.key" title="Tags" data-index="tagList" >
       <template v-slot="tagList">
-        <div v-model:tagList="tableData[tagList.index].tagList">
-          <a-input
-            v-if="tagList.showInput"
-            ref="inputRef"
-            type="text"
-            size="small"
-            :style="{ width: '78px' }"
-            @blur="handleInputConfirm"
-            @keyup.enter="handleInputConfirm"
-          />
-
-          <!--        <span>-->
-          <!--          <a-tag v-for="tag in tags" :key="tag" closable color="blue">{{ tag }}</a-tag>-->
-          <!--        </span>-->
-          <a-tag v-else @click="function (tagList) {tagList.showInput=true}" style="background: #fff; border-style: dashed">
-            <a-icon type="plus-circle" />
-            候补教室
-            <!--          <plus-outlined />-->
+        <a-input
+          ref="`input-`+tagList.index"
+          v-if="state[tagList.index].inputVisible"
+          type="text"
+          size="small"
+          v-model="state[tagList.index].inputValue"
+          :style="{ width: '78px' }"
+          @blur="handleInputConfirm(tagList.index)"
+          @keyup.enter="handleInputConfirm(tagList.index)"
+          allow-clear
+        />
+        <a-tag v-else @click="showInput(tagList.index)" style="background: #fff; border-style: dashed">
+          <a-icon type="plus-circle" />
+          候补教室
+          <!--          <plus-outlined />-->
+        </a-tag>
+        <span>
+          <a-tag
+            v-for="tag in state[tagList.index].tags"
+            :visible="true"
+            :key="tag"
+            closable
+            @close="handleClose(tag, tagList.index)"
+            color="blue">
+            {{ tag }}
           </a-tag>
-        </div>
+        </span>
 
       </template>
     </a-table-column>
@@ -60,16 +72,7 @@ export default ({
     return {
       pagination: false,
       tableData: null,
-      rowSelection: {
-        onChange: (selectedRowKeys, selectedRows) => {
-          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
-        },
-
-        getCheckboxProps: record => ({
-          disabled: record.name === 'Disabled User',
-          // Column configuration not to be checked
-          name: record.name
-        })
+      state: {
       }
     }
   },
@@ -77,30 +80,49 @@ export default ({
     this.processWeekDetail = function () {
       const weekDetail = this.weekDetail
       const tableData = []
+      const stateObject = {}
       Object.keys(weekDetail).forEach(function (key, index) {
         weekDetail[key].index = index
-        weekDetail[key].inputShow = true
         weekDetail[key].tagList = {
           key: key,
           index: index,
           weekIndex: weekDetail[key].weekIndex,
-          tags: weekDetail[key].tags,
-          showInput: false
+          tags: weekDetail[key].tags
+        }
+        stateObject[index] = {
+          key: key,
+          index: index,
+          inputVisible: false,
+          inputValue: null,
+          tags: weekDetail[key].tags
         }
         tableData.push(weekDetail[key])
       })
       this.tableData = tableData
+      this.state = stateObject
     }
     this.processWeekDetail()
   },
   methods: {
-    testInput (tagList) {
-      console.log('fuck', tagList)
-      tagList.showInput = true
-      console.log(this.tableData[tagList.index].tagList)
-      this.$set(this.tableData[tagList.index].tagList, 'showInput', false)
-      console.log()
+    showInput (index) {
+      this.state[index].inputVisible = true
+    },
+    handleInputConfirm (index) {
+      if (this.state[index].inputValue && this.tableData[index].tags.indexOf(this.state[index].inputValue) === -1) {
+        this.state[index].tags = [...this.tableData[index].tags, this.state[index].inputValue]
+        this.tableData[index].tags = this.state[index].tags
+      }
+      this.state[index].inputVisible = false
+    },
+    handleClose (tag, index) {
+      const count = Array.from(this.tableData[index].tags).indexOf(tag)
+      console.log(count)
+      this.tableData[index].tags.splice(count, 1)
+    },
+    onChangeClassroom (index) {
+      console.log('change', this.tableData[index])
     }
+
   },
   watch: {
     tableData: {

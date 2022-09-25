@@ -159,12 +159,16 @@ export default {
         }
         const infoKey = row.星期号 + row.节次号
         processed[parseInt(row.周次号) - 1]['weekStatus'][infoKey] = {
+          courseId: row.课程号,
+          classId: row.班级号,
+          weekNum: row.周次号,
           key: infoKey,
           week: row.meta.week,
           date: row.meta.date,
           weekIndex: parseInt(row.周次号),
           oldClassroom: row.meta.classroom,
-          newClassroom: row.meta.classroom
+          newClassroom: row.meta.classroom,
+          tags: []
         }
       })
       this.columnData = processed
