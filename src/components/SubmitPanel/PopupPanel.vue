@@ -158,16 +158,15 @@ export default {
           }
         }
         const infoKey = row.星期号 + row.节次号
-        console.log(row)
         processed[parseInt(row.周次号) - 1]['weekStatus'][infoKey] = {
           key: infoKey,
           week: row.meta.week,
           date: row.meta.date,
+          weekIndex: parseInt(row.周次号),
           oldClassroom: row.meta.classroom,
           newClassroom: row.meta.classroom
         }
       })
-      console.log(processed)
       this.columnData = processed
     },
     getWeekStatus (week) {
@@ -186,6 +185,10 @@ export default {
     },
     setCourseTime (CourseTimeInfo) {
       console.log(CourseTimeInfo)
+    },
+    setTagList (tagList) {
+      console.log(tagList.key, tagList.weekIndex)
+      this.columnData[tagList.weekIndex].weekStatus[tagList.key].tagList.showInput = true
     }
   }
 

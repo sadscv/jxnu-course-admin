@@ -1,5 +1,5 @@
 <template>
-  <a-table :data-source="tableData" size="small" :row-class-name="rowClassNameFn" :showHeader="false" :pagination="false" >
+  <a-table :data-source="tableData" size="small" :showHeader="false" :pagination="false" >
     <a-table-column key="firstName" title="first name" data-index="firstName">
       First Name
     </a-table-column>
@@ -11,45 +11,46 @@
       <template v-slot="index" >
         <a-input-search
           size="default"
+          :style="{ width: '200px' }"
           enter-button="变更教室"
           v-model="tableData[index].newClassroom"
           allow-clear >
         </a-input-search>
       </template>
     </a-table-column>
-    <a-table-column key="tags" title="Tags" data-index="tagList" >
-      <a-tag style="background: #fff; border-style: dashed">
-        候补教室
-        <plus-outlined />
-      </a-tag>
-      <template>
-        <a-input
-          v-if="inputVisible"
-          ref="inputRef"
-          type="text"
-          size="small"
-          :style="{ width: '78px' }"
-          v-model:value="inputValue"
-          @blur="handleInputConfirm"
-          @keyup.enter="handleInputConfirm"
-        />
-        <a-tag v-else @click="clickInput" style="background: #fff; border-style: dashed">
-          候补教室
-          <plus-outlined />
-        </a-tag>
-        <!--        <span>-->
-        <!--          <a-tag v-for="tag in tags" :key="tag" closable color="blue">{{ tag }}</a-tag>-->
-        <!--        </span>-->
+    <a-table-column key="tagList.key" title="Tags" data-index="tagList" >
+      <template v-slot="tagList">
+        <div v-model:tagList="tableData[tagList.index].tagList">
+          <a-input
+            v-if="tagList.showInput"
+            ref="inputRef"
+            type="text"
+            size="small"
+            :style="{ width: '78px' }"
+            @blur="handleInputConfirm"
+            @keyup.enter="handleInputConfirm"
+          />
+
+          <!--        <span>-->
+          <!--          <a-tag v-for="tag in tags" :key="tag" closable color="blue">{{ tag }}</a-tag>-->
+          <!--        </span>-->
+          <a-tag v-else @click="function (tagList) {tagList.showInput=true}" style="background: #fff; border-style: dashed">
+            <a-icon type="plus-circle" />
+            候补教室
+            <!--          <plus-outlined />-->
+          </a-tag>
+        </div>
+
       </template>
     </a-table-column>
   </a-table>
 </template>
 <script>
-import { PlusOutlined } from '@ant-design/icons-vue'
 
+import InputTag from '@/components/SubmitPanel/InputTag'
 export default ({
   components: {
-    PlusOutlined
+    InputTag
   },
   props: {
     weekDetail: {
@@ -59,7 +60,6 @@ export default ({
     return {
       pagination: false,
       tableData: null,
-      test: null,
       rowSelection: {
         onChange: (selectedRowKeys, selectedRows) => {
           console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
@@ -81,8 +81,11 @@ export default ({
         weekDetail[key].index = index
         weekDetail[key].inputShow = true
         weekDetail[key].tagList = {
+          key: key,
+          index: index,
+          weekIndex: weekDetail[key].weekIndex,
           tags: weekDetail[key].tags,
-          showInput: true
+          showInput: false
         }
         tableData.push(weekDetail[key])
       })
@@ -91,18 +94,12 @@ export default ({
     this.processWeekDetail()
   },
   methods: {
-    clickInput (tagList) {
-      console.log(tagList)
-      tagList.showInput = false
-    },
-    onChangeClassroom () {
-      console.log('fuck')
-    },
-    rowClassNameFn (row, rowIndex) {
-      row.index = rowIndex
-    },
-    getIndex (data) {
-      return data.index
+    testInput (tagList) {
+      console.log('fuck', tagList)
+      tagList.showInput = true
+      console.log(this.tableData[tagList.index].tagList)
+      this.$set(this.tableData[tagList.index].tagList, 'showInput', false)
+      console.log()
     }
   },
   watch: {
