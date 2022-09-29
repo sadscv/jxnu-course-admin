@@ -16,6 +16,7 @@
         <a-input-search
           size="default"
           :style="{ width: '200px' }"
+          :loading="loading"
           enter-button="变更教室"
           @search="onChangeClassroom(index)"
           v-model="tableData[index].newClassroom"
@@ -66,7 +67,8 @@ export default ({
   },
   props: {
     weekDetail: {
-    }
+    },
+    loading: false
   },
   data () {
     return {
@@ -83,6 +85,7 @@ export default ({
       const stateObject = {}
       Object.keys(weekDetail).forEach(function (key, index) {
         weekDetail[key].index = index
+        weekDetail[key].loading = true
         weekDetail[key].tagList = {
           key: key,
           index: index,
@@ -91,6 +94,7 @@ export default ({
         }
         stateObject[index] = {
           key: key,
+          loading: false,
           index: index,
           inputVisible: false,
           inputValue: null,
@@ -120,8 +124,12 @@ export default ({
       this.tableData[index].tags.splice(count, 1)
     },
     onChangeClassroom (index) {
-      console.log('change', index, this.tableData[index])
-      this.$emit('pushWeekChange', this.tableData)
+      const weekData = this.tableData[index]
+      if (weekData.oldClassroom !== weekData.newClassroom || weekData.tags.length > 0) {
+        this.$emit('pushWeekChange', this.tableData)
+      }
+
+
     }
 
   },

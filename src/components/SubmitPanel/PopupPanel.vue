@@ -41,7 +41,7 @@
             </a-table-column>
             <a-table-column title="课程信息" data-index="courseInfo">
               <template v-slot="courseInfo">
-                <courseTimeTable @syncCourseTime="setCourseTime" @pushWeekChange="saveWeekChange" :weekDetail="getWeekStatus(courseInfo.key)"></courseTimeTable>
+                <courseTimeTable @syncCourseTime="setCourseTime" @pushWeekChange="saveWeekChange" :weekDetail="getWeekStatus(courseInfo.key)" :loading="getWeekLoadingStatus(courseInfo.key)"></courseTimeTable>
               </template>
             </a-table-column>
           </a-table>
@@ -138,7 +138,6 @@ export default {
         processed.push('1')
         }
       CourseInfo.forEach((row) => {
-        // console.log(processed[parseInt(row.周次号) - 1])
         if (processed[parseInt(row.周次号) - 1] === '1') {
           processed[parseInt(row.周次号) - 1] = {
             key: row.周次号,
@@ -151,7 +150,8 @@ export default {
             },
             courseDetail: {},
             weekStatus: {
-            }
+            },
+            loadingStatus: false
           }
         }
         const infoKey = row.星期号 + row.节次号
@@ -164,8 +164,8 @@ export default {
           date: row.meta.date,
           weekIndex: parseInt(row.周次号),
           oldClassroom: row.meta.classroom,
-          newClassroom: row.meta.classroom,
-          tags: []
+          newClassroom: (row.临时教室号 ? row.临时教室号 : row.meta.classroom),
+          tags: (row.备选教室号 ? row.备选教室号.split(',') : [])
         }
       })
       this.columnData = processed
@@ -181,6 +181,9 @@ export default {
     },
     getWeekStatus (week) {
       return this.columnData[parseInt(week) - 1]['weekStatus']
+    },
+    getWeekLoadingStatus(week) {
+      return this.columnData[parseInt(week) - 1].loadingStatus
     },
     initWeekUsageList () {
       const checkList = []
@@ -199,13 +202,16 @@ export default {
     },
     saveWeekChange (info) {
       const parameter = info
-      saveWeekStatus(parameter).then((response) => {
+      console.log(parameter)
+      info.forEach((weekInfo, index) => {
+        parameter[index].tags = parameter[index].tags.toString()
       })
-      console.log('pushweekchange', info)
-
+      this.columnData[parameter[0].weekIndex -1 ].loadingStatus = true
+      saveWeekStatus(parameter).then((response) => {
+        this.columnData[parameter[0].weekIndex - 1].loadingStatus = false
+      })
     },
     setTagList (tagList) {
-      console.log(tagList.key, tagList.weekIndex)
       this.columnData[tagList.weekIndex].weekStatus[tagList.key].tagList.showInput = true
     }
   }
