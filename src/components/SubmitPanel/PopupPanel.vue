@@ -24,7 +24,7 @@
 
         <a-form-item label="开课周次">
           <div>
-            <a-checkable-tag v-for="check in weekUsageList" :key="check.key" v-model:checked="check.value" @change="handleChange">{{ check.week }}</a-checkable-tag>
+            <a-checkable-tag v-for="check in weekUsageList" :key="check.key" v-model:checked="check.value">{{ check.week }}</a-checkable-tag>
           </div>
         </a-form-item>
         <a-form-item label="">
@@ -36,12 +36,12 @@
             </a-table-column>
             <a-table-column title="开课" data-index="courseWeek">
               <template v-slot="courseWeek">
-                <a-switch v-model:checked="weekUsageList[courseWeek.week].value" size="small"/>
+                <a-switch v-model:checked="weekUsageList[courseWeek.week].value" @change="handleChange(weekUsageList, courseWeek.week)" size="small"/>
               </template>
             </a-table-column>
             <a-table-column title="课程信息" data-index="courseInfo">
               <template v-slot="courseInfo">
-                <courseTimeTable @syncCourseTime="setCourseTime" :weekDetail="getWeekStatus(courseInfo.key)"></courseTimeTable>
+                <courseTimeTable @syncCourseTime="setCourseTime" @pushWeekChange="saveWeekChange" :weekDetail="getWeekStatus(courseInfo.key)"></courseTimeTable>
               </template>
             </a-table-column>
           </a-table>
@@ -54,7 +54,7 @@
 <script>
 
 import courseTimeTable from '@/components/SubmitPanel/courseTimeTable'
-import { getCourseStatus } from '@/api/manage'
+import { getCourseStatus, saveWeekStatus } from '@/api/manage'
 
 export default {
   name: 'PopupPanel',
@@ -131,9 +131,6 @@ export default {
         resolve()
         })
     },
-    handleChange (checked) {
-      console.log(checked)
-    },
     setCourseInfo (CourseInfo) {
       const processed = []
       this.pageSize = parseInt(9 / (CourseInfo.length / 17))
@@ -173,6 +170,15 @@ export default {
       })
       this.columnData = processed
     },
+    handleChange (usageList, week) {
+      if (usageList[week].value === false) {
+        console.log('usage', usageList, week)
+        console.log('status', this.columnData[parseInt(week)]['weekStatus'])
+        // this.columnData[parseInt(week)] = []
+      // }else {
+      //   this.columnData[parseInt(week)] = []
+      }
+    },
     getWeekStatus (week) {
       return this.columnData[parseInt(week) - 1]['weekStatus']
     },
@@ -182,13 +188,21 @@ export default {
         checkList.push({
           key: `checked${i}`,
           value: true,
-          week: `第${i}周`
+          week: `第${i}周`,
+          weekNum: i
         })
       }
       this.weekUsageList = checkList
     },
     setCourseTime (CourseTimeInfo) {
       console.log(CourseTimeInfo)
+    },
+    saveWeekChange (info) {
+      const parameter = info
+      saveWeekStatus(parameter).then((response) => {
+      })
+      console.log('pushweekchange', info)
+
     },
     setTagList (tagList) {
       console.log(tagList.key, tagList.weekIndex)

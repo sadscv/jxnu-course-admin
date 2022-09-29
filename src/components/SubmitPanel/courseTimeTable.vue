@@ -120,7 +120,8 @@ export default ({
       this.tableData[index].tags.splice(count, 1)
     },
     onChangeClassroom (index) {
-      console.log('change', this.tableData[index])
+      console.log('change', index, this.tableData[index])
+      this.$emit('pushWeekChange', this.tableData)
     }
 
   },
@@ -130,6 +131,9 @@ export default ({
         this.$emit('syncCourseTime', this.tableData)
       },
       deep: true
+    },
+    weekDetail (val) {
+      this.processWeekDetail(val)
     }
   }
 })

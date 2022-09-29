@@ -8,7 +8,8 @@ const api = {
   permission: '/permission',
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree',
-  courseStatus: 'course_status'
+  courseStatus: 'course_status',
+  weekStatus: '/week_status'
 }
 
 export default api
@@ -76,5 +77,16 @@ export function getCourseStatus (parameter) {
     url: api.courseStatus,
     method: 'get',
     params: parameter
+  })
+}
+
+export function saveWeekStatus (parameter) {
+  return request({
+    url: api.weekStatus,
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: parameter
   })
 }
