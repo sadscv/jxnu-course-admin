@@ -41,7 +41,7 @@
             </a-table-column>
             <a-table-column title="课程信息" data-index="courseInfo">
               <template v-slot="courseInfo">
-                <courseTimeTable @syncCourseTime="setCourseTime" @pushWeekChange="saveWeekChange" :weekDetail="getWeekStatus(courseInfo.key)" :loading="getWeekLoadingStatus(courseInfo.key)"></courseTimeTable>
+                <courseTimeTable @syncCourseTime="setCourseTime" @pushWeekChange="saveWeekChange" :weekDetail="getWeekStatus(courseInfo.key)" :loading="getWeekLoadingStatus(courseInfo.key)" :enable="weekUsageList[parseInt(courseInfo.key) - 1].value"></courseTimeTable>
               </template>
             </a-table-column>
           </a-table>
@@ -182,7 +182,7 @@ export default {
     getWeekStatus (week) {
       return this.columnData[parseInt(week) - 1]['weekStatus']
     },
-    getWeekLoadingStatus(week) {
+    getWeekLoadingStatus (week) {
       return this.columnData[parseInt(week) - 1].loadingStatus
     },
     initWeekUsageList () {
@@ -201,12 +201,12 @@ export default {
       console.log(CourseTimeInfo)
     },
     saveWeekChange (info) {
-      const parameter = info
+      const parameter = JSON.parse(JSON.stringify(info))
       console.log(parameter)
       info.forEach((weekInfo, index) => {
         parameter[index].tags = parameter[index].tags.toString()
       })
-      this.columnData[parameter[0].weekIndex -1 ].loadingStatus = true
+      this.columnData[parameter[0].weekIndex - 1 ].loadingStatus = true
       saveWeekStatus(parameter).then((response) => {
         this.columnData[parameter[0].weekIndex - 1].loadingStatus = false
       })

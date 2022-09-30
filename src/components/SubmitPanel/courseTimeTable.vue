@@ -1,5 +1,5 @@
 <template>
-  <a-table :data-source="tableData" size="small" :showHeader="false" :pagination="false" >
+  <a-table :data-source="tableData" :customRow="customRow" size="small" :showHeader="false" :pagination="false" >
     <a-table-column key="firstName" title="first name" data-index="firstName">
       First Name
     </a-table-column>
@@ -68,7 +68,8 @@ export default ({
   props: {
     weekDetail: {
     },
-    loading: false
+    loading: false,
+    enable: {}
   },
   data () {
     return {
@@ -128,8 +129,26 @@ export default ({
       if (weekData.oldClassroom !== weekData.newClassroom || weekData.tags.length > 0) {
         this.$emit('pushWeekChange', this.tableData)
       }
-
-
+    },
+    customRow (record, index) {
+      if (!this.enable) {
+        console.log(record, index)
+        return {
+          style: {
+            // color: record.remarkDesc ? record.remarkDesc.fontColor : '#262626',
+            'background-color': '#dcdcdc',
+            'pointer-events': 'none'
+          }
+        }
+      } else {
+        return {
+          style: {
+            color: record.remarkDesc ? record.remarkDesc.fontColor : '#262626',
+            // 'background-color': '#dcdcdc',
+            // 'pointer-events': 'none'
+          }
+        }
+      }
     }
 
   },
@@ -146,3 +165,10 @@ export default ({
   }
 })
 </script>
+
+<style scoped>
+.disabled-row {
+  background-color: #dcdcdc;
+  pointer-events: none;
+}
+</style>
