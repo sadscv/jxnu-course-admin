@@ -90,7 +90,7 @@ export default ({
         weekDetail[key].tagList = {
           key: key,
           index: index,
-          weekIndex: weekDetail[key].weekIndex,
+          weekNum: weekDetail[key].weekNum,
           tags: weekDetail[key].tags
         }
         stateObject[index] = {

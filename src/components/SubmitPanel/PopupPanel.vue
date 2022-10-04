@@ -21,7 +21,6 @@
         <a-form-item label="课程名称" layout="horizontal"> <a>{{ courseInfo.course_name }}</a> </a-form-item>
         <a-form-item label="班级名称" layout="inline"> <a>{{ courseInfo.class_name }}</a> </a-form-item>
         <a-form-item label="任课教师" layout="inline"> <a>{{ courseInfo.teacher_name }}</a> </a-form-item>
-
         <a-form-item label="开课周次">
           <div>
             <a-checkable-tag v-for="check in weekUsageList" :key="check.key" v-model:checked="check.value">{{ check.week }}</a-checkable-tag>
@@ -36,7 +35,7 @@
             </a-table-column>
             <a-table-column title="开课" data-index="courseWeek">
               <template v-slot="courseWeek">
-                <a-switch v-model:checked="weekUsageList[courseWeek.week].value" @change="handleChange(weekUsageList, courseWeek.week)" size="small"/>
+                <a-switch v-model:checked="weekUsageList[courseWeek.week].value"  size="small"/>
               </template>
             </a-table-column>
             <a-table-column title="课程信息" data-index="courseInfo">
@@ -135,10 +134,10 @@ export default {
       const processed = []
       this.pageSize = parseInt(9 / (CourseInfo.length / 17))
       for (let i = 1; i < 18; i++) {
-        processed.push('1')
+        processed.push(null)
         }
       CourseInfo.forEach((row) => {
-        if (processed[parseInt(row.周次号) - 1] === '1') {
+        if (processed[parseInt(row.周次号) - 1] === null) {
           processed[parseInt(row.周次号) - 1] = {
             key: row.周次号,
             courseWeek: {
@@ -148,7 +147,6 @@ export default {
             courseInfo: {
               key: row.周次号
             },
-            courseDetail: {},
             weekStatus: {
             },
             loadingStatus: false
@@ -158,26 +156,16 @@ export default {
         processed[parseInt(row.周次号) - 1]['weekStatus'][infoKey] = {
           courseId: row.课程号,
           classId: row.班级号,
-          weekNum: row.周次号,
+          weekNum: parseInt(row.周次号),
           key: infoKey,
           week: row.meta.week,
           date: row.meta.date,
-          weekIndex: parseInt(row.周次号),
           oldClassroom: row.meta.classroom,
           newClassroom: (row.临时教室号 ? row.临时教室号 : row.meta.classroom),
           tags: (row.备选教室号 ? row.备选教室号.split(',') : [])
         }
       })
       this.columnData = processed
-    },
-    handleChange (usageList, week) {
-      if (usageList[week].value === false) {
-        console.log('usage', usageList, week)
-        console.log('status', this.columnData[parseInt(week)]['weekStatus'])
-        // this.columnData[parseInt(week)] = []
-      // }else {
-      //   this.columnData[parseInt(week)] = []
-      }
     },
     getWeekStatus (week) {
       return this.columnData[parseInt(week) - 1]['weekStatus']
@@ -206,14 +194,11 @@ export default {
       info.forEach((weekInfo, index) => {
         parameter[index].tags = parameter[index].tags.toString()
       })
-      this.columnData[parameter[0].weekIndex - 1 ].loadingStatus = true
+      this.columnData[parameter[0].weekNum - 1 ].loadingStatus = true
       saveWeekStatus(parameter).then((response) => {
-        this.columnData[parameter[0].weekIndex - 1].loadingStatus = false
+        this.columnData[parameter[0].weekNum - 1].loadingStatus = false
       })
     },
-    setTagList (tagList) {
-      this.columnData[tagList.weekIndex].weekStatus[tagList.key].tagList.showInput = true
-    }
   }
 
 }
