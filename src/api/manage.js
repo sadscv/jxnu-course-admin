@@ -90,3 +90,13 @@ export function saveWeekStatus (parameter) {
     data: parameter
   })
 }
+export function saveCourseStatus (parameter) {
+  return request({
+    url: api.courseStatus,
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: parameter
+  })
+}

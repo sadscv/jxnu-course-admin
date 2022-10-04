@@ -40,7 +40,6 @@ export default new Vuex.Store({
     allInfosExtra: null,
     allInfosExtraUpdateTime: null,
     reservedClassroom: {}, // 持久化
-    currentBuilding: '惟义楼',
     currentTeacher: {},
     lastUpdateTime: null
   },

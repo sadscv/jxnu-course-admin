@@ -56,6 +56,11 @@
 
       </template>
     </a-table-column>
+    <a-table-column key="input" title="Comment" data-index="comment">
+      <template v-slot="input">
+        <a-input placeholder="备注" />
+      </template>
+    </a-table-column>
   </a-table>
 </template>
 <script>

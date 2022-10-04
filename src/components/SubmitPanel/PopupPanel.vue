@@ -9,6 +9,7 @@
     </a-button>
     <a-modal
       :visible="visible"
+      :confirm-loading="loading"
       title="提交申请"
       okText="提交申请"
       width="900px"
@@ -35,7 +36,7 @@
             </a-table-column>
             <a-table-column title="开课" data-index="courseWeek">
               <template v-slot="courseWeek">
-                <a-switch v-model:checked="weekUsageList[courseWeek.week].value"  size="small"/>
+                <a-switch v-model:checked="weekUsageList[courseWeek].value" size="small"/>
               </template>
             </a-table-column>
             <a-table-column title="课程信息" data-index="courseInfo">
@@ -53,7 +54,7 @@
 <script>
 
 import courseTimeTable from '@/components/SubmitPanel/courseTimeTable'
-import { getCourseStatus, saveWeekStatus } from '@/api/manage'
+import { getCourseStatus, saveCourseStatus, saveWeekStatus } from '@/api/manage'
 
 export default {
   name: 'PopupPanel',
@@ -115,37 +116,46 @@ export default {
       this.visible = false
     },
     handlePush () {
-      return new Promise((resolve) => {
-        this.$emit('pushSelectedClassroom',
-            this.$store.state.currentBuilding,
-            this.rawSelectedData,
-            this.appliedClassrooms,
-            this.currentTeacher.教号,
-            this.currentTeacher.姓名,
-            this.college_name
-        )
-        setTimeout(() => {
-          this.visible = false
-        }, 0)
-        resolve()
+      this.weekUsageList.forEach((usage, index) => {
+        this.columnData[index].enable = usage.value
+      })
+
+      const pushList = []
+      this.columnData.forEach((week) => {
+        const status = week.weekStatus
+        Object.keys(status).forEach((key) => {
+          status[key].enable = week.enable
+          pushList.push(status[key])
         })
+      })
+      const _this = this
+      this.loading = true
+      saveCourseStatus(pushList).then(res => {
+        console.log(res)
+      }).catch(() => {
+        _this.$message.error('内部错误，请重试', 10)
+      }).finally(() => {
+        _this.loading = false
+        _this.visible = false
+      })
     },
     setCourseInfo (CourseInfo) {
       const processed = []
       this.pageSize = parseInt(9 / (CourseInfo.length / 17))
-      for (let i = 1; i < 18; i++) {
+      for (let i = 0; i < 17; i++) {
         processed.push(null)
         }
       CourseInfo.forEach((row) => {
-        if (processed[parseInt(row.周次号) - 1] === null) {
-          processed[parseInt(row.周次号) - 1] = {
-            key: row.周次号,
-            courseWeek: {
-              week: row.周次号 - 1,
-              on: false
-            },
+        const weekNum = parseInt(row.周次号)
+        this.weekUsageList[weekNum - 1].value = parseInt(row.当周开课) !== 0
+        if (processed[weekNum - 1] === null) {
+          processed[weekNum - 1] = {
+            key: weekNum,
+            courseWeek: weekNum - 1,
+            courseId: row.课程号,
+            classId: row.班级号,
             courseInfo: {
-              key: row.周次号
+              key: weekNum
             },
             weekStatus: {
             },
@@ -153,18 +163,20 @@ export default {
           }
         }
         const infoKey = row.星期号 + row.节次号
-        processed[parseInt(row.周次号) - 1]['weekStatus'][infoKey] = {
+        processed[weekNum - 1]['weekStatus'][infoKey] = {
           courseId: row.课程号,
           classId: row.班级号,
-          weekNum: parseInt(row.周次号),
+          weekNum: weekNum,
           key: infoKey,
           week: row.meta.week,
           date: row.meta.date,
           oldClassroom: row.meta.classroom,
           newClassroom: (row.临时教室号 ? row.临时教室号 : row.meta.classroom),
-          tags: (row.备选教室号 ? row.备选教室号.split(',') : [])
+          tags: (row.备选教室号 ? row.备选教室号.split(',') : []),
+          comments: null
         }
       })
+
       this.columnData = processed
     },
     getWeekStatus (week) {
@@ -175,12 +187,12 @@ export default {
     },
     initWeekUsageList () {
       const checkList = []
-      for (let i = 1; i < 18; i++) {
+      for (let i = 0; i < 17; i++) {
         checkList.push({
-          key: `checked${i}`,
+          key: `checked${i + 1}`,
           value: true,
-          week: `第${i}周`,
-          weekNum: i
+          week: `第${i + 1}周`,
+          weekNum: i + 1
         })
       }
       this.weekUsageList = checkList
@@ -198,7 +210,7 @@ export default {
       saveWeekStatus(parameter).then((response) => {
         this.columnData[parameter[0].weekNum - 1].loadingStatus = false
       })
-    },
+    }
   }
 
 }
