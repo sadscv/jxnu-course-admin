@@ -114,7 +114,7 @@ export default {
   },
   created () {
     this.updateData()
-    this.LoadAllCourses()
+    // this.LoadAllCourses()
   },
   methods: {
     ...mapActions(['Login', 'Logout']),
