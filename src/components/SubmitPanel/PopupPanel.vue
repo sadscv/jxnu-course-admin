@@ -173,7 +173,7 @@ export default {
           oldClassroom: row.meta.classroom,
           newClassroom: (row.临时教室号 ? row.临时教室号 : row.meta.classroom),
           tags: (row.备选教室号 ? row.备选教室号.split(',') : []),
-          comments: null
+          comment: null
         }
       })
 

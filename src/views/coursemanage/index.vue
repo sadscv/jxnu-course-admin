@@ -5,6 +5,7 @@
     <a-table
       ref="table"
       class="table"
+      :loading="tableLoading"
       :data-source="rows"
       :locale="{emptyText: '没有匹配的记录'}"
       :pagination="{position: 'both', showTotal: total => `${total} 条记录`}"

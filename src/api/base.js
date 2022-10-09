@@ -4,7 +4,7 @@ import request from '@/utils/request'
 const baseApi = {
   college: '/base/college',
   info: '/base/info',
-  AllCourse: '/all_classes'
+  AllCourse: '/all_courses'
 }
 
 export default baseApi

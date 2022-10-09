@@ -56,9 +56,10 @@
 
       </template>
     </a-table-column>
-    <a-table-column key="input" title="Comment" data-index="comment">
-      <template v-slot="input">
-        <a-input placeholder="备注" />
+    <a-table-column key="input" title="Comment" data-index="index">
+      <template v-slot="index">
+        <a-input placeholder="备注" v-model="state[index].comment" @change="syncComment(state[index].comment, index)"/>
+        {{ state[index].comment }}
       </template>
     </a-table-column>
   </a-table>
@@ -98,13 +99,16 @@ export default ({
           weekNum: weekDetail[key].weekNum,
           tags: weekDetail[key].tags
         }
+        weekDetail[key].index = index
+        weekDetail[key].comment = null
         stateObject[index] = {
           key: key,
           loading: false,
           index: index,
           inputVisible: false,
           inputValue: null,
-          tags: weekDetail[key].tags
+          tags: weekDetail[key].tags,
+          comment: null
         }
         tableData.push(weekDetail[key])
       })
@@ -135,6 +139,11 @@ export default ({
         this.$emit('pushWeekChange', this.tableData)
       }
     },
+    syncComment (value, index) {
+      this.tableData[index].comment = value
+      console.log(this.tableData[index].comment)
+      // console.log(this.state[index].comment.value)
+    },
     customRow (record, index) {
       if (!this.enable) {
         console.log(record, index)
@@ -148,7 +157,7 @@ export default ({
       } else {
         return {
           style: {
-            color: record.remarkDesc ? record.remarkDesc.fontColor : '#262626',
+            color: record.remarkDesc ? record.remarkDesc.fontColor : '#262626'
             // 'background-color': '#dcdcdc',
             // 'pointer-events': 'none'
           }

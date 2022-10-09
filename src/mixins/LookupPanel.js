@@ -6,7 +6,8 @@ export const LookupPanelMixin = {
       promiseWorker: null,
       rows: [],
       storageBusy: false,
-      timer: null
+      timer: null,
+      tableLoading: true
     }
   },
   mounted () {
@@ -15,8 +16,9 @@ export const LookupPanelMixin = {
     setTimeout(() => {
       this.filter(this.$refs.conditions.conditions).then((rows) => {
         this.rows = rows
+        this.tableLoading = false
       })
-      }, 2000)
+      }, 4000)
   },
   watch: {
     '$store.state.allClasses' () {
@@ -77,7 +79,7 @@ export const LookupPanelMixin = {
         this.$store.dispatch(select ? 'reserveClassThenSelect' : 'reserveClass', data)
       }
     },
-    updateCourseInfo(data, select) {
+    updateCourseInfo (data, select) {
     },
     LoadAllCourses: function () {
       // const hide = this.$message.loading('正在检查数据更新...', 0);
