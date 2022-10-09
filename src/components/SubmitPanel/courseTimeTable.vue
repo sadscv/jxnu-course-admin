@@ -59,7 +59,6 @@
     <a-table-column key="input" title="Comment" data-index="index">
       <template v-slot="index">
         <a-input placeholder="备注" v-model="state[index].comment" @change="syncComment(state[index].comment, index)"/>
-        {{ state[index].comment }}
       </template>
     </a-table-column>
   </a-table>
@@ -100,7 +99,6 @@ export default ({
           tags: weekDetail[key].tags
         }
         weekDetail[key].index = index
-        weekDetail[key].comment = null
         stateObject[index] = {
           key: key,
           loading: false,
@@ -108,7 +106,7 @@ export default ({
           inputVisible: false,
           inputValue: null,
           tags: weekDetail[key].tags,
-          comment: null
+          comment: weekDetail[key].comment
         }
         tableData.push(weekDetail[key])
       })

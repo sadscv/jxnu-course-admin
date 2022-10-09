@@ -154,6 +154,7 @@ export default {
             courseWeek: weekNum - 1,
             courseId: row.课程号,
             classId: row.班级号,
+            comment: row.备注,
             courseInfo: {
               key: weekNum
             },
@@ -173,7 +174,7 @@ export default {
           oldClassroom: row.meta.classroom,
           newClassroom: (row.临时教室号 ? row.临时教室号 : row.meta.classroom),
           tags: (row.备选教室号 ? row.备选教室号.split(',') : []),
-          comment: null
+          comment: row.备注
         }
       })
 
