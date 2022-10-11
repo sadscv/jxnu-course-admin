@@ -10,7 +10,7 @@
           <div class="header">
             <a href="/">
               <img src="~@/assets/logo.svg" class="logo" alt="logo">
-              <span class="title">江西师范大学课程管理系统</span>
+              <span class="title">本科教学调课管理系统</span>
             </a>
           </div>
           <div class="desc">
@@ -22,12 +22,12 @@
 
         <div class="footer">
           <div class="links">
-            <a href="_self">帮助</a>
-            <a href="_self">隐私</a>
-            <a href="_self">条款</a>
+<!--            <a href="_self">帮助</a>-->
+<!--            <a href="_self">隐私</a>-->
+<!--            <a href="_self">条款</a>-->
           </div>
           <div class="copyright">
-            Copyright &copy; 2018 vueComponent
+            Copyright &copy; 2022 JXNU
           </div>
         </div>
       </div>
