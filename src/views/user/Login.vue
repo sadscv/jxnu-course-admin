@@ -152,8 +152,8 @@ export default {
           const loginParams = { ...values }
           // delete loginParams.username
           // loginParams[!state.loginType ? 'email' : 'username'] = 'college'
-          // loginParams.password = md5(values.password)
-          loginParams.password = values.password
+          loginParams.password = btoa(values.password)
+          // loginParams.password = values.password
           Login(loginParams)
             .then((res) => this.loginSuccess(res))
             .catch(err => this.requestFailed(err))
