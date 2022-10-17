@@ -1,5 +1,12 @@
 <template>
-  <a-table :data-source="tableData" :customRow="customRow" size="small" :showHeader="false" :pagination="false" >
+  <a-table
+    :data-source="tableData"
+    :customRow="customRow"
+    size="small"
+    :showHeader="false"
+    :pagination="false"
+    :rowSelection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
+  >
     <a-table-column key="firstName" title="first name" data-index="firstName">
       First Name
     </a-table-column>
@@ -81,7 +88,8 @@ export default ({
       pagination: false,
       tableData: null,
       state: {
-      }
+      },
+      selectedRowKeys: []
     }
   },
   created () {
@@ -161,6 +169,10 @@ export default ({
           }
         }
       }
+    },
+    onSelectChange (selectedRowKeys, selectedRows) {
+      this.selectedRowKeys = selectedRowKeys
+      this.selectedRows = selectedRows
     }
 
   },

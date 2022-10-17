@@ -27,6 +27,13 @@
             <a-checkable-tag v-for="check in weekUsageList" :key="check.key" v-model:checked="check.value">{{ check.week }}</a-checkable-tag>
           </div>
         </a-form-item>
+        <div style="margin-bottom: 16px">
+          <span style="margin-left: 8px">
+            <template>
+              {{ `Selected 1 items` }}
+            </template>
+          </span>
+        </div>
         <a-form-item label="">
           <a-table :data-source="columnData" size="small" :pagination="{ pageSize: this.pageSize }">
             <a-table-column title="周次" data-index="key">
@@ -39,7 +46,7 @@
                 <a-switch v-model:checked="weekUsageList[courseWeek].value" size="small"/>
               </template>
             </a-table-column>
-            <a-table-column title="课程信息" data-index="courseInfo">
+            <a-table-column title="勾选调停课" data-index="courseInfo">
               <template v-slot="courseInfo">
                 <courseTimeTable @syncCourseTime="setCourseTime" @pushWeekChange="saveWeekChange" :weekDetail="getWeekStatus(courseInfo.key)" :loading="getWeekLoadingStatus(courseInfo.key)" :enable="weekUsageList[parseInt(courseInfo.key) - 1].value"></courseTimeTable>
               </template>

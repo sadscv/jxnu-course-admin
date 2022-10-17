@@ -93,18 +93,6 @@ export const LookupPanelMixin = {
         this.$store.commit('LOADED', true)
       })
     },
-    getLimitationColor (limitation) {
-      switch (limitation) {
-        case '禁止选课':
-          return 'red'
-        case '禁止退课':
-          return 'blue'
-        case '限制人数':
-          return 'orange'
-        default:
-          return null
-      }
-    }
   }
 }
 
