@@ -1,81 +1,76 @@
 <template>
-  <a-table
-    :data-source="tableData"
-    :customRow="customRow"
-    size="small"
-    :showHeader="false"
-    :pagination="false"
-    :rowSelection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
-  >
-    <a-table-column key="firstName" title="first name" data-index="firstName">
-      First Name
-    </a-table-column>
-    <a-table-column key="week" title="Last Name" data-index="week" />
-    <a-table-column key="date" title="Date" data-index="date" />
-    <!--    <a-table-column key="oldClassroom" title="教室" data-index="oldClassroom">-->
-    <!--      <template v-slot="oldClassroom">-->
-    <!--        原教室: <b>{{oldClassroom}}</b>-->
-    <!--      </template>-->
-    <!--    </a-table-column>-->
-
-    <a-table-column key="index" title="Action" data-index="index">
-      <template v-slot="index" >
-        <a-input-search
-          size="default"
-          :style="{ width: '200px' }"
-          :loading="loading"
-          enter-button="变更教室"
-          @search="onChangeClassroom(index)"
-          v-model="tableData[index].newClassroom"
-          allow-clear >
-        </a-input-search>
-      </template>
-    </a-table-column>
-    <a-table-column key="tagList.key" title="Tags" data-index="tagList" >
-      <template v-slot="tagList">
-        <a-input
-          ref="`input-`+tagList.index"
-          v-if="state[tagList.index].inputVisible"
-          type="text"
-          size="small"
-          v-model="state[tagList.index].inputValue"
-          :style="{ width: '78px' }"
-          @blur="handleInputConfirm(tagList.index)"
-          @keyup.enter="handleInputConfirm(tagList.index)"
-          allow-clear
-        />
-        <a-tag v-else @click="showInput(tagList.index)" style="background: #fff; border-style: dashed">
-          <a-icon type="plus-circle" />
-          候补教室
+  <div>
+    <a-table
+      :data-source="tableData"
+      :customRow="customRow"
+      size="small"
+      :showHeader="false"
+      :pagination="false"
+      :rowSelection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
+    >
+      <!--    <a-table-column key="firstName" title="first name" data-index="firstName">-->
+      <!--      First Name-->
+      <!--    </a-table-column>-->
+      <a-table-column key="week" title="Last Name" data-index="week" />
+      <a-table-column key="date" title="Date" data-index="date" />
+      <a-table-column key="index" title="Action" data-index="index">
+        <template v-slot="index" >
+          <a-input-search
+            size="default"
+            :style="{ width: '200px' }"
+            :loading="loading"
+            enter-button="变更教室"
+            @search="onChangeClassroom(index)"
+            v-model="tableData[index].newClassroom"
+            allow-clear >
+          </a-input-search>
+        </template>
+      </a-table-column>
+      <a-table-column key="tagList.key" title="Tags" data-index="tagList" >
+        <template v-slot="tagList">
+          <a-input
+            ref="`input-`+tagList.index"
+            v-if="state[tagList.index].inputVisible"
+            type="text"
+            size="small"
+            v-model="state[tagList.index].inputValue"
+            :style="{ width: '78px' }"
+            @blur="handleInputConfirm(tagList.index)"
+            @keyup.enter="handleInputConfirm(tagList.index)"
+            allow-clear
+          />
+          <a-tag v-else @click="showInput(tagList.index)" style="background: #fff; border-style: dashed">
+            <a-icon type="plus-circle" />
+            候补教室
           <!--          <plus-outlined />-->
-        </a-tag>
-        <span>
-          <a-tag
-            v-for="tag in state[tagList.index].tags"
-            :visible="true"
-            :key="tag"
-            closable
-            @close="handleClose(tag, tagList.index)"
-            color="blue">
-            {{ tag }}
           </a-tag>
-        </span>
+          <span>
+            <a-tag
+              v-for="tag in state[tagList.index].tags"
+              :visible="true"
+              :key="tag"
+              closable
+              @close="handleClose(tag, tagList.index)"
+              color="blue">
+              {{ tag }}
+            </a-tag>
+          </span>
 
-      </template>
-    </a-table-column>
-    <a-table-column key="input" title="Comment" data-index="index">
-      <template v-slot="index">
-        <a-input placeholder="备注" v-model="state[index].comment" @change="syncComment(state[index].comment, index)"/>
-      </template>
-    </a-table-column>
-  </a-table>
+        </template>
+      </a-table-column>
+      <a-table-column key="input" title="Comment" data-index="index">
+        <template v-slot="index">
+          <a-input placeholder="备注" v-model="state[index].comment" @change="syncComment(state[index].comment, index)"/>
+        </template>
+      </a-table-column>
+    </a-table>
+  </div>
+
 </template>
 <script>
 
-import InputTag from '@/components/SubmitPanel/InputTag'
 export default ({
   components: {
-    InputTag
   },
   props: {
     weekDetail: {
@@ -87,6 +82,7 @@ export default ({
     return {
       pagination: false,
       tableData: null,
+      weekNum: null,
       state: {
       },
       selectedRowKeys: []
@@ -97,9 +93,11 @@ export default ({
       const weekDetail = this.weekDetail
       const tableData = []
       const stateObject = {}
+      let weekNum = null
       Object.keys(weekDetail).forEach(function (key, index) {
         weekDetail[key].index = index
         weekDetail[key].loading = true
+        weekNum = weekDetail[key].weekNum
         weekDetail[key].tagList = {
           key: key,
           index: index,
@@ -114,12 +112,14 @@ export default ({
           inputVisible: false,
           inputValue: null,
           tags: weekDetail[key].tags,
-          comment: weekDetail[key].comment
+          comment: weekDetail[key].comment,
+          weekNum: weekDetail[key].weekNum
         }
         tableData.push(weekDetail[key])
       })
       this.tableData = tableData
       this.state = stateObject
+      this.weekNum = weekNum
     }
     this.processWeekDetail()
   },
@@ -173,6 +173,7 @@ export default ({
     onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
+      this.$emit('onAdjustCourse', this.selectedRows, this.weekNum)
     }
 
   },

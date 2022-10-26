@@ -18,7 +18,7 @@ export const LookupPanelMixin = {
         this.rows = rows
         this.tableLoading = false
       })
-      }, 4000)
+      }, 4500)
   },
   watch: {
     '$store.state.allClasses' () {

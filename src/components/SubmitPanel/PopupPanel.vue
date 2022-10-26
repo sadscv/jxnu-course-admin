@@ -27,13 +27,20 @@
             <a-checkable-tag v-for="check in weekUsageList" :key="check.key" v-model:checked="check.value">{{ check.week }}</a-checkable-tag>
           </div>
         </a-form-item>
-        <div style="margin-bottom: 16px">
-          <span style="margin-left: 8px">
-            <template>
-              {{ `Selected 1 items` }}
-            </template>
-          </span>
-        </div>
+        <a-form-item>
+          <template v-if="displayAdjustButton()">
+            <div style="margin-bottom: 16px" >
+              <span style="margin-left: 8px">
+                <b>调停课时段：</b>
+                {{this.adjustedString }}
+              </span>
+              <a-button type="primary" :loading="loading" @click="pushAdjustedCourse">
+                测试
+              </a-button>
+            </div>
+          </template>
+        </a-form-item>
+
         <a-form-item label="">
           <a-table :data-source="columnData" size="small" :pagination="{ pageSize: this.pageSize }">
             <a-table-column title="周次" data-index="key">
@@ -48,7 +55,14 @@
             </a-table-column>
             <a-table-column title="勾选调停课" data-index="courseInfo">
               <template v-slot="courseInfo">
-                <courseTimeTable @syncCourseTime="setCourseTime" @pushWeekChange="saveWeekChange" :weekDetail="getWeekStatus(courseInfo.key)" :loading="getWeekLoadingStatus(courseInfo.key)" :enable="weekUsageList[parseInt(courseInfo.key) - 1].value"></courseTimeTable>
+                <courseTimeTable
+                  @syncCourseTime="setCourseTime"
+                  @pushWeekChange="saveWeekChange"
+                  @onAdjustCourse="setCourseAdjustInfo"
+                  :weekDetail="getWeekStatus(courseInfo.key)"
+                  :loading="getWeekLoadingStatus(courseInfo.key)"
+                  :enable="weekUsageList[parseInt(courseInfo.key) - 1].value"
+                />
               </template>
             </a-table-column>
           </a-table>
@@ -77,6 +91,8 @@ export default {
       columnData: null,
       pageSize: 10,
       weekUsageList: [],
+      adjustedCourse: {},
+      adjustedString: '',
       labelCol: {
         // style: { width: '150px' },
         // xs: { span: 8 },
@@ -112,8 +128,6 @@ export default {
       }
       getCourseStatus(params).then(res => {
         this.setCourseInfo(res.result)
-      }).catch(() => {
-        _this.$message.error('内部错误，请重试', 10)
       }).finally(() => {
         _this.loading = false
         _this.visible = true
@@ -206,7 +220,33 @@ export default {
       this.weekUsageList = checkList
     },
     setCourseTime (CourseTimeInfo) {
-      console.log(CourseTimeInfo)
+      // console.log(CourseTimeInfo)
+    },
+    setCourseAdjustInfo (weekSelectedRows, weekNum) {
+      if (weekSelectedRows.length === 0) {
+        delete this.adjustedCourse[weekNum]
+      } else {
+        this.adjustedCourse[weekNum] = weekSelectedRows
+      }
+      this.adjustTimeCaculator(this.adjustedCourse)
+    },
+    adjustTimeCaculator (adjustedCourse) {
+      let adjustedString = ''
+      for (const weekNum in adjustedCourse) {
+        const prefix = '第' + weekNum + '周'
+        let weekString = ''
+        adjustedCourse[weekNum].forEach((course) => {
+          console.log(course)
+        })
+        for (const index in adjustedCourse[weekNum]) {
+          const course = adjustedCourse[weekNum][index]
+          const week = course.week
+          const date = course.date
+          weekString += (week + date)
+        }
+        adjustedString += (prefix + weekString)
+      }
+      this.adjustedString = adjustedString
     },
     saveWeekChange (info) {
       const parameter = JSON.parse(JSON.stringify(info))
@@ -218,6 +258,11 @@ export default {
       saveWeekStatus(parameter).then((response) => {
         this.columnData[parameter[0].weekNum - 1].loadingStatus = false
       })
+    },
+    displayAdjustButton () {
+      return this.adjustedString.length > 0
+    },
+    pushAdjustedCourse () {
     }
   }
 
