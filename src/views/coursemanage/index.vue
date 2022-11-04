@@ -1,93 +1,97 @@
 <template>
-  <div class="lookup-panel-wrapper">
-    <LookupConditions ref="conditions" @filter="countdown(300, true)" />
-    <!--suppress JSUnusedGlobalSymbols -->
-    <a-table
-      ref="table"
-      class="table"
-      :loading="tableLoading"
-      :data-source="rows"
-      :locale="{emptyText: '没有匹配的记录'}"
-      :pagination="{position: 'both', showTotal: total => `${total} 条记录`}"
-    >
-      <a-table-column title="管理单位" data-index="college">
-        <template v-slot="college">
-          <a target="_blank" rel="external nofollow">
-            <strong>{{ college }}</strong>
-          </a>
-        </template>
-      </a-table-column>
+  <page-header-wrapper>
+    <div class="lookup-panel-wrapper">
+      <LookupConditions ref="conditions" @filter="countdown(300, true)" />
+      <!--suppress JSUnusedGlobalSymbols -->
+      <a-table
+        ref="table"
+        class="table"
+        :loading="tableLoading"
+        :data-source="rows"
+        :locale="{emptyText: '没有匹配的记录'}"
+        :pagination="{position: 'both', showTotal: total => `${total} 条记录`}"
+      >
+        <a-table-column title="管理单位" data-index="college">
+          <template v-slot="college">
+            <a target="_blank" rel="external nofollow">
+              <strong>{{ college }}</strong>
+            </a>
+          </template>
+        </a-table-column>
 
-      <a-table-column title="课程" data-index="course">
-        <template v-slot="course">
-          <a target="_blank" rel="external nofollow">
-            <strong>{{ course.name }}</strong>
-          </a>
-          <a-badge maxlength="10" class="credit-badge" :count="`${course.credit}学分`" />
-          <br />
-          <small class="id-info">{{ course.id }}</small>
-        </template>
-      </a-table-column>
-      <a-table-column title="班级" data-index="classes">
-        <template v-slot="classes">
-          <a>
-            <strong>{{ classes.name }}</strong>
-          </a>
-          <br />
-          <small class="id-info">{{ classes.id }}</small>
-        </template>
-      </a-table-column>
-      <a-table-column title="教师" data-index="teacher">
-        <template v-slot="teacher">
-          <a>
-            <strong>{{ teacher.name }}</strong>
-          </a>
-          <br /><small class="id-info teacher-id-info">{{ teacher.id }}</small>
-        </template>
-      </a-table-column>
-      <a-table-column title="上课时间" data-index="class_time_info">
-        <template v-slot="class_time_info">
-          {{ class_time_info.row['class_time'] }}
-        </template>
-      </a-table-column>
+        <a-table-column title="课程" data-index="course">
+          <template v-slot="course">
+            <a target="_blank" rel="external nofollow">
+              <strong>{{ course.name }}</strong>
+            </a>
+            <a-badge maxlength="10" class="credit-badge" :count="`${course.credit}学分`" />
+            <br />
+            <small class="id-info">{{ course.id }}</small>
+          </template>
+        </a-table-column>
+        <a-table-column title="班级" data-index="classes">
+          <template v-slot="classes">
+            <a>
+              <strong>{{ classes.name }}</strong>
+            </a>
+            <br />
+            <small class="id-info">{{ classes.id }}</small>
+          </template>
+        </a-table-column>
+        <a-table-column title="教师" data-index="teacher">
+          <template v-slot="teacher">
+            <a>
+              <strong>{{ teacher.name }}</strong>
+            </a>
+            <br /><small class="id-info teacher-id-info">{{ teacher.id }}</small>
+          </template>
+        </a-table-column>
+        <a-table-column title="上课时间" data-index="class_time_info">
+          <template v-slot="class_time_info">
+            {{ class_time_info.row['class_time'] }}
+          </template>
+        </a-table-column>
 
-      <a-table-column title="地点" data-index="classroom">
-        <template v-slot="classroom">
-          {{ classroom.classroom_id }}
-        </template>
-      </a-table-column>
-      <a-table-column title="备注" data-index="venue">
-        <template v-slot="venue">
-          <small class="detail-venue">无</small>
-        </template>
-      </a-table-column>
-      <!--suppress HtmlDeprecatedAttribute -->
-      <a-table-column data-index="action" width="1px">
-        <div slot="title" class="about-data-wrapper">
-          <a-popover placement="leftBottom">
-            <div slot="content" class="about-data">
-              * 仅限在教学时间不变情况下的教学场地调整报备<br />
-              * <strong>教学时间变更请提交调停课申请表</strong>
-            </div>
-            <a-button size="small" type="link" icon="info-circle">说明</a-button>
-          </a-popover>
-        </div>
-        <template v-slot="action">
-          <PopupPanel
-            :course-info="getInfo(action.row)"
-          />
-<!--          <a-dropdown-button-->
-<!--            type="primary"-->
-<!--            :disabled="storageBusy"-->
-<!--            @click="updateCourseInfo(action.row, false)"-->
-<!--          >-->
-<!--          </a-dropdown-button>-->
-        </template>
-      </a-table-column>
+        <a-table-column title="地点" data-index="classroom">
+          <template v-slot="classroom">
+            {{ classroom.classroom_id }}
+          </template>
+        </a-table-column>
+        <a-table-column title="备注" data-index="venue">
+          <template v-slot="venue">
+            <small class="detail-venue">无</small>
+          </template>
+        </a-table-column>
+        <!--suppress HtmlDeprecatedAttribute -->
+        <a-table-column data-index="action" width="1px">
+          <div slot="title" class="about-data-wrapper">
+            <a-popover placement="leftBottom">
+              <div slot="content" class="about-data">
+                * 仅限在教学时间不变情况下的教学场地调整报备<br />
+                * <strong>教学时间变更请提交调停课申请表</strong>
+              </div>
+              <a-button size="small" type="link" icon="info-circle">说明</a-button>
+            </a-popover>
+          </div>
+          <template v-slot="action">
+            <PopupPanel
+              :course-info="getInfo(action.row)"
+            />
+            <!--          <a-dropdown-button-->
+            <!--            type="primary"-->
+            <!--            :disabled="storageBusy"-->
+            <!--            @click="updateCourseInfo(action.row, false)"-->
+            <!--          >-->
+            <!--          </a-dropdown-button>-->
+          </template>
+        </a-table-column>
 
-    </a-table>
+      </a-table>
 
-  </div>
+    </div>
+
+  </page-header-wrapper>
+
 </template>
 
 <script>
@@ -113,26 +117,6 @@
        })
     },
     methods: {
-      handleClassCardClick (classId) {
-        window.console.log(classId)
-        const tasks = []
-        // this.$store.dispatch("clearAllUserData");
-        if (this.$store.state.currentClass.length !== 0) {
-            // this.$store.commit(this.$store.dispatch.CURRENT_CLASS(class_id));
-            this.$store.state.currentClass = classId
-      }
-        return new Promise((resolve) => {
-          // this.activeTab = 'reserved';
-          tasks.push(this.$store.dispatch('clearAllUserData'))
-          tasks.push(this.$store.dispatch('updateAllClassesFromFlask', classId))
-          Promise.all(tasks).then(() => {
-            tasks.push(this.$store.dispatch('selectAllFlaskClass'))
-            tasks.push(this.$store.dispatch('checkAllFlaskClass'))
-            resolve()
-          })
-        }
-      )
-    },
     getInfo (row) {
       return row
     }

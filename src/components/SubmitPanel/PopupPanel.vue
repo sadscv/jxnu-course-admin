@@ -75,7 +75,7 @@
 <script>
 
 import courseTimeTable from '@/components/SubmitPanel/courseTimeTable'
-import { getCourseStatus, saveCourseStatus, saveWeekStatus } from '@/api/manage'
+import { getCourseStatus, saveCourseStatus, saveWeekStatus, commitCourseAdjustment } from '@/api/manage'
 
 export default {
   name: 'PopupPanel',
@@ -263,6 +263,10 @@ export default {
       return this.adjustedString.length > 0
     },
     pushAdjustedCourse () {
+      const parameter = this.adjustedCourse
+      commitCourseAdjustment(parameter).then(() => {
+        console.log('ok')
+      })
     }
   }
 

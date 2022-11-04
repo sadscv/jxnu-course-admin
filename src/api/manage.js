@@ -9,7 +9,8 @@ const api = {
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree',
   courseStatus: 'course_status',
-  weekStatus: '/week_status'
+  weekStatus: '/week_status',
+  courseAdjustment: '/course_adjustment'
 }
 
 export default api
@@ -93,6 +94,17 @@ export function saveWeekStatus (parameter) {
 export function saveCourseStatus (parameter) {
   return request({
     url: api.courseStatus,
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: parameter
+  })
+}
+
+export function commitCourseAdjustment (parameter) {
+  return request({
+    url: api.courseAdjustment,
     method: 'post',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'
