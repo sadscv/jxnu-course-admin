@@ -60,7 +60,7 @@
 
 <style scoped>
   .lookup-conditions {
-    margin: 0 16px 16px;
+    margin: 0 0 10px 0;
   }
 
   .w-200px {

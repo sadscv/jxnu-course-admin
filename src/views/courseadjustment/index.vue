@@ -9,7 +9,7 @@
   import TableList from './TableList'
   import NumberCapacity from './NumberCapacity'
   import ATableColumn from 'ant-design-vue/es/table/Column'
-  import PopupPanel from '@/components/SubmitPanel/PopupPanel'
+  import PopupPanel from '@/views/coursemanage/SubmitPanel/PopupPanel'
 
   export default {
     name: 'LookupPanel',

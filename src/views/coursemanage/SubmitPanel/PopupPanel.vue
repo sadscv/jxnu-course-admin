@@ -74,7 +74,7 @@
 
 <script>
 
-import courseTimeTable from '@/components/SubmitPanel/courseTimeTable'
+import courseTimeTable from '@/views/coursemanage/SubmitPanel/courseTimeTable'
 import { getCourseStatus, saveCourseStatus, saveWeekStatus, commitCourseAdjustment } from '@/api/manage'
 
 export default {

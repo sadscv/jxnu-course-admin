@@ -1,5 +1,5 @@
 <template>
-  <page-header-wrapper>
+  <page-header-wrapper :title="false">
     <div class="lookup-panel-wrapper">
       <LookupConditions ref="conditions" @filter="countdown(300, true)" />
       <!--suppress JSUnusedGlobalSymbols -->
@@ -101,7 +101,7 @@
   import { LookupPanelMixin } from '@/mixins/LookupPanel'
   import { introductionOpenerMixin } from '@/mixins/common/introductionOpener'
   import ATableColumn from 'ant-design-vue/es/table/Column'
-  import PopupPanel from '@/components/SubmitPanel/PopupPanel'
+  import PopupPanel from '@/views/coursemanage/SubmitPanel/PopupPanel'
 
   export default {
     name: 'LookupPanel',
@@ -128,7 +128,8 @@
 
 <style scoped>
   .lookup-panel-wrapper {
-    padding-top: 16px;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   /*noinspection CssUnusedSymbol*/
