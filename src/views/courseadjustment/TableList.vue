@@ -51,7 +51,7 @@
       </div>
 
       <div class="table-operator">
-<!--        <a-button type="primary" icon="plus" @click="handleAdd">测试</a-button>-->
+        <!--        <a-button type="primary" icon="plus" @click="handleAdd">测试</a-button>-->
         <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
           <a-menu slot="overlay">
             <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
@@ -78,7 +78,7 @@
           {{ index + 1 }}
         </span>
         <span slot="status" slot-scope="text">
-          <a-badge :status="text | statusTypeFilter" :text="text | statusFilter" />
+          <a-badge :status="parseInt(text) | statusTypeFilter" :text="parseInt(text)| statusFilter" />
         </span>
         <span slot="description" slot-scope="text">
           <ellipsis :length="4" tooltip>{{ text }}</ellipsis>
@@ -124,23 +124,30 @@ const columns = [
   {
     title: '课程管理单位',
     dataIndex: '课程管理单位',
-    sorter: true
+    sorter: true,
+    // scopedSlots: { customRender: 'description' }
+    // customRender: (text) => text + ' 次',
     // needTotal: true,
-    // customRender: (text) => text + ' 次'
   },
   {
-    title: '课程基础信息',
-    dataIndex: '课程基础信息'
+    title: '任课教师',
+    dataIndex: '任课教师'
   },
   {
-    title: '调课时间',
-    // sorter: true,
+    title: '课程名称',
+    dataIndex: '课程名称'
+  },
+  {
+    title: '班级名称',
+    dataIndex: '班级名称'
+  },
+  {
+    title: '原上课时间',
     dataIndex: '调停课时间'
   },
   {
-    title: '补课时间',
-    dataIndex: '补课时间描述',
-    scopedSlots: { customRender: 'description' }
+    title: '补课日期',
+    dataIndex: '补课日期',
   },
   {
     title: '补课地点',
@@ -148,7 +155,8 @@ const columns = [
   },
   {
     title: '当前状态',
-    dataIndex: '审核状态'
+    dataIndex: '审核状态',
+    scopedSlots: { customRender: 'status' }
   },
   {
     title: '最后更新时间',
@@ -165,20 +173,20 @@ const columns = [
 
 const statusMap = {
   0: {
-    status: 'default',
-    text: '关闭'
+    status: 'error',
+    text: '学院审批'
   },
   1: {
     status: 'processing',
-    text: '运行中'
+    text: '补充材料'
   },
   2: {
     status: 'success',
-    text: '已上线'
+    text: '待补课'
   },
   3: {
-    status: 'error',
-    text: '异常'
+    status: 'default',
+    text: '结束'
   }
 }
 
