@@ -10,7 +10,8 @@ const api = {
   orgTree: '/org/tree',
   courseStatus: 'course_status',
   weekStatus: '/week_status',
-  courseAdjustment: '/course_adjustment'
+  adjustCourse: '/adjust_course',
+  updateAdjustment: '/update_adjustment'
 }
 
 export default api
@@ -104,7 +105,19 @@ export function saveCourseStatus (parameter) {
 
 export function commitCourseAdjustment (parameter) {
   return request({
-    url: api.courseAdjustment,
+    url: api.adjustCourse,
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: parameter
+  })
+}
+
+export function updateAdjustmentInfo (parameter) {
+  console.log('fsafsafasfasdf')
+  return request({
+    url: api.updateAdjustment,
     method: 'post',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'

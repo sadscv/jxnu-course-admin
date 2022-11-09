@@ -9,12 +9,34 @@
   >
     <a-spin :spinning="loading">
       <a-form :form="form" v-bind="formLayout">
-        <!-- 检查是否有 id 并且大于0，大于0是修改。其他是新增，新增不显示主键ID -->
         <a-form-item v-show="model && model.id > 0" label="主键ID">
           <a-input v-decorator="['id', { initialValue: 0 }]" disabled />
         </a-form-item>
         <a-form-item label="描述">
-          <a-input v-decorator="['description', {rules: [{required: true, min: 5, message: '请输入至少五个字符的规则描述！'}]}]" />
+          <a-input v-decorator="['description']" />
+          <!--          <a-input v-decorator="['description', {rules: [{required: true, min: 5, message: '请输入至少五个字符的规则描述！'}]}]" />-->
+        </a-form-item>
+        <a-form-item label="补课日期" >
+          <a-date-picker v-decorator="['补课日期']" style="width: 100%" placeholder="请选择补课日期"/>
+        </a-form-item>
+        <a-form-item label="补课地点">
+          <a-input v-decorator="['补课地点']" />
+        </a-form-item>
+        <a-form-item label="调停课表信息" v-if="false"></a-form-item>
+        <a-form-item label="调停课表附件">
+          <a-upload
+            v-decorator="['调停课表附件']"
+            ref="uploader"
+            action="/API/v1.0/upload_adjustment"
+            list-type="text"
+            :file-list="uploadFileList"
+            :before-upload="beforeUpload"
+            @change="handleChange"
+          >
+            <a-button>
+              点击上传
+            </a-button>
+          </a-upload>
         </a-form-item>
       </a-form>
     </a-spin>
@@ -25,7 +47,7 @@
 import pick from 'lodash.pick'
 
 // 表单字段
-const fields = ['description', 'id']
+const fields = ['description', 'id', '补课日期', '补课地点', '调停课表附件']
 
 export default {
   props: {
@@ -54,7 +76,48 @@ export default {
       }
     }
     return {
-      form: this.$form.createForm(this)
+      // form: this.getFormValue()
+      form: this.$form.createForm(this),
+      uploadFileList: [{ uid: '-1', name: 'xxx.png', status: 'done', url: '' }],
+      handleChange: (info) => {
+        const adjustmentInfo = []
+        console.log('fuck')
+        const resFileList = [...info.fileList]
+        this.uploadFileList = resFileList
+        this.form.getFieldDecorator('调停课表信息', { initialValue: '' })
+        for (const key in resFileList) {
+          const fileInfo = resFileList[key]
+          if (fileInfo.hasOwnProperty('status') && fileInfo.status === 'done') {
+            info = {
+              'url': fileInfo.response,
+              'name': fileInfo.name
+            }
+            adjustmentInfo.push(info)
+          }
+          this.form.setFieldsValue({ '调停课表信息': adjustmentInfo })
+          console.log(this.uploadFileList)
+        }
+      }
+    }
+  },
+  methods: {
+    beforeUpload (file) {
+      const { type, size } = file
+      const limitType = type === 'image/jpeg' || type === 'image/png'
+      if (!limitType) {
+          this.$message.error('请上传 JPG、PNG 格式图片!')
+      }
+      const limitSize = size / 1024 / 1024 < 10
+      if (!limitSize) {
+          this.$message.error('图片不可大于 10MB!')
+      }
+      return limitType && limitSize
+    },
+
+    getFormValue () {
+      const form = this.$form.createForm(this)
+      console.log(form)
+      return form
     }
   },
   created () {
@@ -65,6 +128,7 @@ export default {
 
     // 当 model 发生改变时，为表单设置值
     this.$watch('model', () => {
+      console.log('watchingmodel', this.model)
       this.model && this.form.setFieldsValue(pick(this.model, fields))
     })
   }

@@ -263,9 +263,11 @@ export default {
       return this.adjustedString.length > 0
     },
     pushAdjustedCourse () {
-      const parameter = this.adjustedCourse
+      const parameter = {
+        'adjustmentInfo': this.adjustedCourse,
+        'courseInfo': this.courseInfo
+      }
       commitCourseAdjustment(parameter).then(() => {
-        console.log('ok')
       })
     }
   }

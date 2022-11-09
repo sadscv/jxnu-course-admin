@@ -72,7 +72,7 @@
         :data="loadData"
         :alert="true"
         :rowSelection="rowSelection"
-        showPagination="auto"
+        :showPagination="false"
       >
         <span slot="serial" slot-scope="text, record, index">
           {{ index + 1 }}
@@ -109,7 +109,7 @@
 <script>
 import moment from 'moment'
 import { STable, Ellipsis } from '@/components'
-import { getRoleList } from '@/api/manage'
+import { getRoleList, updateAdjustmentInfo } from '@/api/manage'
 import { getAdjustmentList } from '@/api/course'
 
 import StepByStepModal from './modules/StepByStepModal'
@@ -124,7 +124,7 @@ const columns = [
   {
     title: '课程管理单位',
     dataIndex: '课程管理单位',
-    sorter: true,
+    sorter: true
     // scopedSlots: { customRender: 'description' }
     // customRender: (text) => text + ' 次',
     // needTotal: true,
@@ -135,7 +135,7 @@ const columns = [
   },
   {
     title: '课程名称',
-    dataIndex: '课程名称'
+    dataIndex: '课程名称标识'
   },
   {
     title: '班级名称',
@@ -147,7 +147,7 @@ const columns = [
   },
   {
     title: '补课日期',
-    dataIndex: '补课日期',
+    dataIndex: '补课日期'
   },
   {
     title: '补课地点',
@@ -155,6 +155,7 @@ const columns = [
   },
   {
     title: '当前状态',
+    width: '120px',
     dataIndex: '审核状态',
     scopedSlots: { customRender: 'status' }
   },
@@ -215,7 +216,6 @@ export default {
         console.log('loadData request parameters:', requestParameters)
         return getAdjustmentList(requestParameters)
           .then(res => {
-            console.log('resrsersrwe')
             console.log(res)
             return res
           })
@@ -258,13 +258,15 @@ export default {
       form.validateFields((errors, values) => {
         if (!errors) {
           console.log('values', values)
-          if (values.id > 0) {
+          if (values.id) {
             // 修改 e.g.
-            new Promise((resolve, reject) => {
-              setTimeout(() => {
-                resolve()
-              }, 1000)
-            }).then(res => {
+            // new Promise((resolve, reject) => {
+            //   // setTimeout(() => {
+            //   //   resolve()
+            //   // }, 1000)
+            //
+            // })
+            updateAdjustmentInfo(values).then(res => {
               this.visible = false
               this.confirmLoading = false
               // 重置表单数据
@@ -275,21 +277,10 @@ export default {
               this.$message.info('修改成功')
             })
           } else {
-            // 新增
-            new Promise((resolve, reject) => {
-              setTimeout(() => {
-                resolve()
-              }, 1000)
-            }).then(res => {
-              this.visible = false
-              this.confirmLoading = false
-              // 重置表单数据
-              form.resetFields()
-              // 刷新表格
-              this.$refs.table.refresh()
-
-              this.$message.info('新增成功')
-            })
+            this.$message.error('修改失败,请重试')
+            form.resetFields()
+            this.visible = false
+            this.confirmLoading = false
           }
         } else {
           this.confirmLoading = false

@@ -160,8 +160,6 @@ export default {
       }
       )
       const result = this.data(parameter)
-      console.log('$$$$$$$$$$$$$$$$$$$$$$')
-          console.log(result)
       // 对接自己的通用数据接口需要修改下方代码中的 r.pageNo, r.totalCount, r.data
       // eslint-disable-next-line
       if ((typeof result === 'object' || typeof result === 'function') && typeof result.then === 'function') {
