@@ -34,7 +34,7 @@ const errorHandler = (error) => {
         store.dispatch('Logout').then(() => {
           setTimeout(() => {
             window.location.reload()
-          }, 15000)
+          }, 1500)
         })
       }
     }

@@ -13,28 +13,18 @@
               <a-form-item label="当前状态">
                 <a-select v-model="queryParam.status" placeholder="请选择" default-value="0">
                   <a-select-option value="0">全部</a-select-option>
-                  <a-select-option value="1">学院审批中</a-select-option>
-                  <a-select-option value="2">待上传支撑材料</a-select-option>
-                  <a-select-option value="3">待补课</a-select-option>
-                  <a-select-option value="4">已完成</a-select-option>
+                  <a-select-option value="1">待学院审批</a-select-option>
+                  <a-select-option value="2">待补课</a-select-option>
+                  <a-select-option value="3">已完成</a-select-option>
                 </a-select>
               </a-form-item>
             </a-col>
             <template v-if="advanced">
               <a-col :md="8" :sm="24">
                 <a-form-item label="更新日期">
-                  <a-date-picker v-model="queryParam.date" style="width: 100%" placeholder="请输入更新日期"/>
+                  <a-date-picker v-model="queryParam.date" format="YY-MM-DD" style="width: 100%" placeholder="请输入更新日期"/>
                 </a-form-item>
               </a-col>
-              <!--              <a-col :md="8" :sm="24">-->
-              <!--                <a-form-item label="使用状态">-->
-              <!--                  <a-select placeholder="请选择" default-value="0">-->
-              <!--                    <a-select-option value="0">全部</a-select-option>-->
-              <!--                    <a-select-option value="1">关闭</a-select-option>-->
-              <!--                    <a-select-option value="2">运行中</a-select-option>-->
-              <!--                  </a-select>-->
-              <!--                </a-form-item>-->
-              <!--              </a-col>-->
             </template>
             <a-col :md="!advanced && 8 || 24" :sm="24">
               <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
@@ -83,7 +73,12 @@
         <span slot="description" slot-scope="text">
           <ellipsis :length="4" tooltip>{{ text }}</ellipsis>
         </span>
-
+        <span slot="date" slot-scope="date">
+          {{ date && new Date(date).toLocaleDateString() }}
+        </span>
+        <span slot="datetime" slot-scope="date">
+          {{ date && new Date(date).toISOString()}}
+        </span>
         <span slot="action" slot-scope="text, record">
           <template>
             <a @click="handleEdit(record)">配置</a>
@@ -143,11 +138,13 @@ const columns = [
   },
   {
     title: '原上课时间',
+    width: '200px',
     dataIndex: '调停课时间'
   },
   {
     title: '补课日期',
-    dataIndex: '补课日期'
+    dataIndex: '补课日期',
+    scopedSlots: { customRender: 'date' }
   },
   {
     title: '补课地点',
@@ -161,7 +158,9 @@ const columns = [
   },
   {
     title: '最后更新时间',
+    width: '100px',
     dataIndex: '最后修改时间',
+    scopedSlots: { customRender: 'datetime' },
     sorter: true
   },
   {
@@ -175,15 +174,15 @@ const columns = [
 const statusMap = {
   0: {
     status: 'error',
-    text: '学院审批'
+    text: '待学院审批'
   },
   1: {
     status: 'processing',
-    text: '补充材料'
+    text: '待补课'
   },
   2: {
     status: 'success',
-    text: '待补课'
+    text: '结束流程'
   },
   3: {
     status: 'default',

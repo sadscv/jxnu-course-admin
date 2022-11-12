@@ -12,15 +12,18 @@
         <a-form-item v-show="model && model.id > 0" label="主键ID">
           <a-input v-decorator="['id', { initialValue: 0 }]" disabled />
         </a-form-item>
-        <a-form-item label="描述">
-          <a-input v-decorator="['description']" />
+        <a-form-item label="调停课业务号" style="display:none">
+          <a-input v-decorator="['调停课业务号']" disabled />
+        </a-form-item>
+        <a-form-item label="调停课事由">
+          <a-input v-decorator="['调停课事由']" />
           <!--          <a-input v-decorator="['description', {rules: [{required: true, min: 5, message: '请输入至少五个字符的规则描述！'}]}]" />-->
         </a-form-item>
         <a-form-item label="补课日期" >
-          <a-date-picker v-decorator="['补课日期']" style="width: 100%" placeholder="请选择补课日期"/>
+          <a-date-picker v-decorator="['补课日期']" style="width: 100%" format="YYYY-MM-DD" placeholder="请选择补课日期"/>
         </a-form-item>
         <a-form-item label="补课地点">
-          <a-input v-decorator="['补课地点']" />
+          <a-input v-decorator="['补课地点描述']" />
         </a-form-item>
         <a-form-item label="调停课表信息" v-if="false"></a-form-item>
         <a-form-item label="调停课表附件">
@@ -47,7 +50,7 @@
 import pick from 'lodash.pick'
 
 // 表单字段
-const fields = ['description', 'id', '补课日期', '补课地点', '调停课表附件']
+const fields = ['description', 'id', '补课日期', '补课地点描述', '调停课表附件', '调停课表信息', '调停课事由']
 
 export default {
   props: {
@@ -78,25 +81,31 @@ export default {
     return {
       // form: this.getFormValue()
       form: this.$form.createForm(this),
-      uploadFileList: [{ uid: '-1', name: 'xxx.png', status: 'done', url: '' }],
-      handleChange: (info) => {
+      uploadFileList: [],
+      handleChange: (fileInfo) => {
         const adjustmentInfo = []
         console.log('fuck')
-        const resFileList = [...info.fileList]
-        this.uploadFileList = resFileList
+        const resFileList = [...fileInfo.fileList]
         this.form.getFieldDecorator('调停课表信息', { initialValue: '' })
         for (const key in resFileList) {
           const fileInfo = resFileList[key]
           if (fileInfo.hasOwnProperty('status') && fileInfo.status === 'done') {
-            info = {
-              'url': fileInfo.response,
-              'name': fileInfo.name
+            const info = {
+              'name': fileInfo.name,
+              'status': fileInfo.status
+            }
+            if (fileInfo.response && fileInfo.response.hasOwnProperty('url')) {
+              fileInfo.url = fileInfo.response.url
+              info.url = fileInfo.url
+            } else {
+              info.url = fileInfo.url
             }
             adjustmentInfo.push(info)
           }
           this.form.setFieldsValue({ '调停课表信息': adjustmentInfo })
-          console.log(this.uploadFileList)
+          console.log(this.uploadFileList, this.form)
         }
+        this.uploadFileList = resFileList
       }
     }
   },
@@ -130,6 +139,19 @@ export default {
     this.$watch('model', () => {
       console.log('watchingmodel', this.model)
       this.model && this.form.setFieldsValue(pick(this.model, fields))
+      const attachmentInfo = pick(this.model, fields)['调停课表附件']
+      let attachments = []
+      if (attachmentInfo) {
+        attachments = JSON.parse(attachmentInfo)
+        this.form.setFieldsValue({ '调停课表信息': attachments })
+      } else {
+        this.form.setFieldsValue({ '调停课表信息': [] })
+      }
+      this.uploadFileList = []
+      for (const att in attachments) {
+        attachments[att].uid = att
+        this.uploadFileList.push(attachments[att])
+      }
     })
   }
 }

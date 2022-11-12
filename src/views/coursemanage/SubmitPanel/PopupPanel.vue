@@ -24,22 +24,10 @@
         <a-form-item label="任课教师" layout="inline"> <a>{{ courseInfo.teacher_name }}</a> </a-form-item>
         <a-form-item label="开课周次">
           <div>
-            <a-checkable-tag v-for="check in weekUsageList" :key="check.key" v-model:checked="check.value">{{ check.week }}</a-checkable-tag>
+            <a-checkable-tag type="danger" v-for="check in weekUsageList" :key="check.key" v-model:checked="check.value">{{ check.week }}</a-checkable-tag>
           </div>
         </a-form-item>
-        <a-form-item>
-          <template v-if="displayAdjustButton()">
-            <div style="margin-bottom: 16px" >
-              <span style="margin-left: 8px">
-                <b>调停课时段：</b>
-                {{this.adjustedString }}
-              </span>
-              <a-button type="primary" :loading="loading" @click="pushAdjustedCourse">
-                测试
-              </a-button>
-            </div>
-          </template>
-        </a-form-item>
+
 
         <a-form-item label="">
           <a-table :data-source="columnData" size="small" :pagination="{ pageSize: this.pageSize }">
@@ -66,6 +54,19 @@
               </template>
             </a-table-column>
           </a-table>
+        </a-form-item>
+        <a-form-item>
+          <template v-if="displayAdjustButton()">
+            <div style="margin-bottom: 16px" >
+              <span style="margin-left: 8px">
+                <b>调停课时段：</b>
+                {{this.adjustedString }}
+              </span>
+              <a-button :loading="loading" @click="pushAdjustedCourse" type="primary" danger>
+                提交调停课
+              </a-button>
+            </div>
+          </template>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -263,11 +264,14 @@ export default {
       return this.adjustedString.length > 0
     },
     pushAdjustedCourse () {
+      this.loading = true
       const parameter = {
         'adjustmentInfo': this.adjustedCourse,
         'courseInfo': this.courseInfo
       }
       commitCourseAdjustment(parameter).then(() => {
+        this.loading = false
+        this.visible = false
       })
     }
   }
