@@ -15,15 +15,18 @@
       <a-table-column key="date" title="Date" data-index="date" />
       <a-table-column key="index" title="Action" data-index="index">
         <template v-slot="index" >
-          <a-input-search
-            size="default"
-            :style="{ width: '200px' }"
-            :loading="loading"
-            enter-button="变更教室"
-            @search="onChangeClassroom(index)"
-            v-model="tableData[index].newClassroom"
-            allow-clear >
-          </a-input-search>
+          <a-space>
+            教室:
+            <a-input
+              size="default"
+              :style="{ width: '130px' }"
+              :loading="loading"
+              @search="onChangeClassroom(index)"
+              v-model="tableData[index].newClassroom"
+              allow-clear >
+            </a-input>
+          </a-space>
+
         </template>
       </a-table-column>
       <a-table-column key="tagList.key" title="Tags" data-index="tagList" >

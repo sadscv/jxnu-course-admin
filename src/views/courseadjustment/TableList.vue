@@ -76,8 +76,10 @@
         <span slot="date" slot-scope="date">
           {{ date && new Date(date).toLocaleDateString() }}
         </span>
-        <span slot="datetime" slot-scope="date">
+        <span slot="datetime" slot-scope="date" >
+          <ellipsis :length="110" tooltip>
           {{ date && new Date(date).toISOString()}}
+          </ellipsis>
         </span>
         <span slot="action" slot-scope="text, record">
           <template>

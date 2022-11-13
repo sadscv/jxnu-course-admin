@@ -22,6 +22,9 @@
         <a-form-item label="补课日期" >
           <a-date-picker v-decorator="['补课日期']" style="width: 100%" format="YYYY-MM-DD" placeholder="请选择补课日期"/>
         </a-form-item>
+        <a-form-item label="补课时段">
+          <a-input v-decorator="['补课时段描述']" placeholder="如 第12节 | 8:00-9:30"/>
+        </a-form-item>
         <a-form-item label="补课地点">
           <a-input v-decorator="['补课地点描述']" />
         </a-form-item>
@@ -50,7 +53,7 @@
 import pick from 'lodash.pick'
 
 // 表单字段
-const fields = ['description', 'id', '补课日期', '补课地点描述', '调停课表附件', '调停课表信息', '调停课事由']
+const fields = ['description', 'id', '补课日期', '补课时段描述', '补课地点描述', '调停课表附件', '调停课表信息', '调停课事由']
 
 export default {
   props: {
@@ -112,13 +115,13 @@ export default {
   methods: {
     beforeUpload (file) {
       const { type, size } = file
-      const limitType = type === 'image/jpeg' || type === 'image/png'
+      const limitType = type === 'image/jpeg' || type === 'image/png' || type === 'pdf'
       if (!limitType) {
-          this.$message.error('请上传 JPG、PNG 格式图片!')
+          this.$message.error('请上传 JPG、PNG 格式图片或PDF文档!')
       }
       const limitSize = size / 1024 / 1024 < 10
       if (!limitSize) {
-          this.$message.error('图片不可大于 10MB!')
+          this.$message.error('文件可大于 10MB!')
       }
       return limitType && limitSize
     },

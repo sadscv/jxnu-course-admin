@@ -12,7 +12,7 @@
       :confirm-loading="loading"
       title="提交申请"
       okText="提交申请"
-      width="900px"
+      width="950px"
       layout="inline"
       @cancel="() => { handleCancel() }"
       @ok="() => { handlePush() }"
