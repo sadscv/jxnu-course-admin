@@ -121,7 +121,7 @@ export default ({
           inputValue: null,
           tags: weekDetail[key].tags,
           comment: weekDetail[key].comment,
-          online: weekDetail[key].online,
+          online: weekDetail[key].online === '1',
           weekNum: weekDetail[key].weekNum
         }
         tableData.push(weekDetail[key])
