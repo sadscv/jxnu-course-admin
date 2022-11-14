@@ -16,7 +16,7 @@
       <a-table-column key="index" title="Action" data-index="index">
         <template v-slot="index" >
           <a-space>
-            教室:
+            地点:
             <a-input
               size="default"
               :style="{ width: '130px' }"
@@ -44,7 +44,7 @@
           />
           <a-tag v-else @click="showInput(tagList.index)" style="background: #fff; border-style: dashed">
             <a-icon type="plus-circle" />
-            候补教室
+            候补场地
           <!--          <plus-outlined />-->
           </a-tag>
           <span>
@@ -61,9 +61,14 @@
 
         </template>
       </a-table-column>
+      <a-table-column data-index="index">
+        <template v-slot="index">
+          <a-switch checked-children="线上" un-checked-children="线下" v-model:checked="state[index].online" @change="syncOnline(state[index].online, index)" />
+        </template>
+      </a-table-column>
       <a-table-column key="input" title="Comment" data-index="index">
         <template v-slot="index">
-          <a-input placeholder="备注" v-model="state[index].comment" @change="syncComment(state[index].comment, index)"/>
+          <a-textarea :autoSize="{ minRows: 1, maxRows: 5}" :placeholder="state[index].online?'请填写线上教学入口':'备注' " v-model="state[index].comment" @change="syncComment(state[index].comment, index)"/>
         </template>
       </a-table-column>
     </a-table>
@@ -116,6 +121,7 @@ export default ({
           inputValue: null,
           tags: weekDetail[key].tags,
           comment: weekDetail[key].comment,
+          online: weekDetail[key].online,
           weekNum: weekDetail[key].weekNum
         }
         tableData.push(weekDetail[key])
@@ -150,8 +156,13 @@ export default ({
     },
     syncComment (value, index) {
       this.tableData[index].comment = value
-      console.log(this.tableData[index].comment)
-      // console.log(this.state[index].comment.value)
+    },
+    syncOnline (value, index) {
+      this.tableData[index].online = value
+      if (value) {
+        this.$message.warn('特别提醒：非疫情等特殊原因不得申请线上教学！', 10)
+      }
+      console.log(this.tableData[index])
     },
     customRow (record, index) {
       if (!this.enable) {

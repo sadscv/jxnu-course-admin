@@ -12,7 +12,7 @@
       :confirm-loading="loading"
       title="提交申请"
       okText="提交申请"
-      width="950px"
+      width="1000px"
       layout="inline"
       @cancel="() => { handleCancel() }"
       @ok="() => { handlePush() }"
@@ -177,6 +177,7 @@ export default {
             courseId: row.课程号,
             classId: row.班级号,
             comment: row.备注,
+            online: row.线上教学,
             courseInfo: {
               key: weekNum
             },
@@ -196,7 +197,8 @@ export default {
           oldClassroom: row.meta.classroom,
           newClassroom: (row.临时教室号 ? row.临时教室号 : row.meta.classroom),
           tags: (row.备选教室号 ? row.备选教室号.split(',') : []),
-          comment: row.备注
+          comment: row.备注,
+          online: row.线上教学
         }
       })
 
