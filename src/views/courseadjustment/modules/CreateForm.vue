@@ -115,7 +115,7 @@ export default {
   methods: {
     beforeUpload (file) {
       const { type, size } = file
-      const limitType = type === 'image/jpeg' || type === 'image/png' || type === 'pdf'
+      const limitType = type === 'image/jpeg' || type === 'image/png' || type === 'application/pdf'
       if (!limitType) {
           this.$message.error('请上传 JPG、PNG 格式图片或PDF文档!')
       }

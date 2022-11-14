@@ -121,7 +121,6 @@ const columns = [
   {
     title: '课程管理单位',
     dataIndex: '课程管理单位',
-    sorter: true
     // scopedSlots: { customRender: 'description' }
     // customRender: (text) => text + ' 次',
     // needTotal: true,
@@ -159,11 +158,11 @@ const columns = [
     scopedSlots: { customRender: 'status' }
   },
   {
-    title: '最后更新时间',
+    title: '更新时间',
     width: '100px',
     dataIndex: '最后修改时间',
     scopedSlots: { customRender: 'datetime' },
-    sorter: true
+    // sorter: true
   },
   {
     title: '操作',
