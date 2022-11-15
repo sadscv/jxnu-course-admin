@@ -28,7 +28,6 @@
           </div>
         </a-form-item>
 
-
         <a-form-item label="">
           <a-table :data-source="columnData" size="small" :pagination="{ pageSize: this.pageSize }">
             <a-table-column title="周次" data-index="key">
@@ -60,7 +59,7 @@
             <div style="margin-bottom: 16px" >
               <span style="margin-left: 8px">
                 <b>调停课时段：</b>
-                {{this.adjustedString }}
+                {{ this.adjustedString }}
               </span>
               <a-button :loading="loading" @click="pushAdjustedCourse" type="primary" danger>
                 提交调停课
@@ -247,7 +246,7 @@ export default {
           const date = course.date
           weekString += (week + date)
         }
-        adjustedString += (prefix + weekString)
+        adjustedString += (prefix + '【' + weekString + '】')
       }
       this.adjustedString = adjustedString
     },
