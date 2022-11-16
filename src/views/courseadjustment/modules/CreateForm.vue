@@ -28,6 +28,9 @@
         <a-form-item label="补课地点">
           <a-input v-decorator="['补课地点描述']" />
         </a-form-item>
+        <a-form-item label="备注">
+          <a-input v-decorator="['备注']" />
+        </a-form-item>
         <a-form-item label="调停课表信息" v-if="false"></a-form-item>
         <a-form-item label="调停课表">
           <a-upload
@@ -53,7 +56,7 @@
 import pick from 'lodash.pick'
 
 // 表单字段
-const fields = ['description', 'id', '补课日期', '补课时段描述', '补课地点描述', '调停课表附件', '调停课表信息', '调停课事由']
+const fields = ['description', 'id', '补课日期', '补课时段描述', '补课地点描述', '调停课表附件', '调停课表信息', '调停课事由', '备注']
 
 export default {
   props: {

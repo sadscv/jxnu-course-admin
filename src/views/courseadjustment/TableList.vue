@@ -12,10 +12,10 @@
             <a-col :md="8" :sm="24">
               <a-form-item label="当前状态">
                 <a-select v-model="queryParam.status" placeholder="请选择" default-value="0">
-                  <a-select-option value="0">全部</a-select-option>
-                  <a-select-option value="1">待学院审批</a-select-option>
-                  <a-select-option value="2">待补课</a-select-option>
-                  <a-select-option value="3">已完成</a-select-option>
+                  <a-select-option value="0">学院审批中</a-select-option>
+                  <a-select-option value="1">待提交补课信息</a-select-option>
+                  <a-select-option value="2">等候补课</a-select-option>
+                  <a-select-option value="3">结束流程</a-select-option>
                 </a-select>
               </a-form-item>
             </a-col>
@@ -83,9 +83,9 @@
         </span>
         <span slot="action" slot-scope="text, record">
           <template>
-            <a @click="handleEdit(record)">配置</a>
+            <a @click="handleEdit(record)">编辑</a>
             <a-divider type="vertical" />
-            <a @click="handleSub(record)">测试</a>
+<!--            <a @click="handleSub(record)">测试</a>-->
           </template>
         </span>
       </s-table>
@@ -209,19 +209,19 @@ const columns = [
 const statusMap = {
   0: {
     status: 'error',
-    text: '待学院审批'
+    text: '学院审批中'
   },
   1: {
     status: 'processing',
-    text: '待补课'
+    text: '待提交补课时间'
   },
   2: {
     status: 'success',
-    text: '结束流程'
+    text: '等候补课'
   },
   3: {
     status: 'default',
-    text: '结束'
+    text: '结束流程'
   }
 }
 
