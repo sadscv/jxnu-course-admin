@@ -29,7 +29,7 @@
 
         </template>
       </a-table-column>
-      <a-table-column key="tagList.key" title="Tags" data-index="tagList" >
+      <a-table-column key="tagList.key" title="Tags" data-index="tagList">
         <template v-slot="tagList">
           <a-input
             ref="`input-`+tagList.index"

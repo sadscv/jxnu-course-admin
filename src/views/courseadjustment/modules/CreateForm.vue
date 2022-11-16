@@ -29,7 +29,7 @@
           <a-input v-decorator="['补课地点描述']" />
         </a-form-item>
         <a-form-item label="调停课表信息" v-if="false"></a-form-item>
-        <a-form-item label="调停课表附件">
+        <a-form-item label="调停课表">
           <a-upload
             v-decorator="['调停课表附件']"
             ref="uploader"

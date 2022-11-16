@@ -78,7 +78,7 @@
         </span>
         <span slot="datetime" slot-scope="date" >
           <ellipsis :length="110" tooltip>
-          {{ date && new Date(date).toISOString()}}
+            {{ date && new Date(date).toISOString().substring(0, 16) }}
           </ellipsis>
         </span>
         <span slot="action" slot-scope="text, record">
@@ -121,6 +121,11 @@ const columns = [
   {
     title: '课程管理单位',
     dataIndex: '课程管理单位',
+    sorter: (a, b) => {
+      const a1 = a.课程管理单位
+      const b1 = b.课程管理单位
+      return a1.localeCompare(b1)
+    }
     // scopedSlots: { customRender: 'description' }
     // customRender: (text) => text + ' 次',
     // needTotal: true,
@@ -145,7 +150,14 @@ const columns = [
   {
     title: '补课日期',
     dataIndex: '补课日期',
-    scopedSlots: { customRender: 'date' }
+    scopedSlots: { customRender: 'date' },
+    key: '补课日期',
+    sortField: '补课日期',
+    sorter: (a, b) => {
+      const a1 = new Date(a.补课日期).getTime()
+      const b1 = new Date(b.补课日期).getTime()
+      return a1 - b1
+    }
   },
   {
     title: '补课地点',
@@ -155,14 +167,36 @@ const columns = [
     title: '当前状态',
     width: '120px',
     dataIndex: '审核状态',
-    scopedSlots: { customRender: 'status' }
+    scopedSlots: { customRender: 'status' },
+    key: '审核状态',
+    sortField: '审核状态',
+    sorter: (a, b) => {
+      const a1 = a.审核状态
+      const b1 = b.审核状态
+      return a1.localeCompare(b1)
+    }
   },
   {
     title: '更新时间',
     width: '100px',
     dataIndex: '最后修改时间',
+    key: '最后修改时间',
+    sortField: '最后修改时间',
+    defaultSortOrder: 'descend',
     scopedSlots: { customRender: 'datetime' },
-    // sorter: true
+    sorter: (a, b) => {
+      const a1 = new Date(a.最后修改时间).getTime()
+      const b1 = new Date(b.最后修改时间).getTime()
+      if (!a1 && b1) {
+        return 1
+      } else if (!a1 && !b1) {
+        return 0
+      } else if (a1 && !b1) {
+        return -1
+      }
+      return a1 - b1
+    }
+
   },
   {
     title: '操作',
