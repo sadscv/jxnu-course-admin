@@ -7,7 +7,7 @@ export const LookupPanelMixin = {
       rows: [],
       storageBusy: false,
       timer: null,
-      tableLoading: true
+      tableLoading: false
     }
   },
   mounted () {
@@ -18,7 +18,7 @@ export const LookupPanelMixin = {
         this.rows = rows
         this.tableLoading = false
       })
-      }, 4500)
+      }, 1)
   },
   watch: {
     '$store.state.allClasses' () {
@@ -83,7 +83,9 @@ export const LookupPanelMixin = {
     },
     LoadAllCourses: function () {
       // const hide = this.$message.loading('正在检查数据更新...', 0);
+      this.tableLoading = true
       this.$store.dispatch('updateAllCoursesInfo').then((data) => {
+        this.tableLoading = false
         if (data != null) {
         } else {
           this.$message.error('未获取到基础数据，请刷新页面重试！', 30)
@@ -92,7 +94,7 @@ export const LookupPanelMixin = {
         this.$message.error('更新课程aaa数据时出错，请刷新页面重试！', 30)
         this.$store.commit('LOADED', true)
       })
-    },
+    }
   }
 }
 
@@ -114,7 +116,7 @@ export const LookupConditionsMixin = {
         filterConflicts: false,
         displayOption: 0,
         number: ''
-      }
+      },
     }
   },
   watch: {
@@ -126,7 +128,7 @@ export const LookupConditionsMixin = {
         this.$emit('filter')
       },
       deep: true
-    }
+    },
 
   }
 }
