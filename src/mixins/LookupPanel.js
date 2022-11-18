@@ -7,18 +7,18 @@ export const LookupPanelMixin = {
       rows: [],
       storageBusy: false,
       timer: null,
-      tableLoading: false
+      tableLoading: true
     }
   },
   mounted () {
     console.log('mount')
     this.promiseWorker = new PromiseWorker(new Worker('../workers/filter.js', { type: 'module' }))
-    setTimeout(() => {
-      this.filter(this.$refs.conditions.conditions).then((rows) => {
-        this.rows = rows
-        this.tableLoading = false
-      })
-      }, 1)
+    // setTimeout(() => {
+    //   this.filter(this.$refs.conditions.conditions).then((rows) => {
+    //     this.rows = rows
+    //     this.tableLoading = true
+    //   })
+    //   }, 1000)
   },
   watch: {
     '$store.state.allClasses' () {
@@ -82,15 +82,17 @@ export const LookupPanelMixin = {
     updateCourseInfo (data, select) {
     },
     LoadAllCourses: function () {
-      // const hide = this.$message.loading('正在检查数据更新...', 0);
       this.tableLoading = true
       this.$store.dispatch('updateAllCoursesInfo').then((data) => {
-        this.tableLoading = false
         if (data != null) {
+          this.filter(this.$refs.conditions.conditions).then((rows) => {
+            this.rows = rows
+            this.tableLoading = false
+          })
         } else {
           this.$message.error('未获取到基础数据，请刷新页面重试！', 30)
         }
-      }).catch(() => {
+      }).then().catch(() => {
         this.$message.error('更新课程aaa数据时出错，请刷新页面重试！', 30)
         this.$store.commit('LOADED', true)
       })
@@ -116,7 +118,7 @@ export const LookupConditionsMixin = {
         filterConflicts: false,
         displayOption: 0,
         number: ''
-      },
+      }
     }
   },
   watch: {
@@ -128,7 +130,7 @@ export const LookupConditionsMixin = {
         this.$emit('filter')
       },
       deep: true
-    },
+    }
 
   }
 }
