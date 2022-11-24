@@ -8,9 +8,11 @@
       :pagination="false"
       :rowSelection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
     >
-      <!--    <a-table-column key="firstName" title="first name" data-index="firstName">-->
-      <!--      First Name-->
-      <!--    </a-table-column>-->
+      <a-table-column data-index="index">
+        <template v-slot="index">
+          <a-switch checked-children="线上" un-checked-children="线下" v-model:checked="state[index].online" @change="syncOnline(state[index].online, index)" />
+        </template>
+      </a-table-column>
       <a-table-column key="week" title="Last Name" data-index="week" />
       <a-table-column key="date" title="Date" data-index="date" />
       <a-table-column key="index" title="Action" data-index="index">
@@ -61,14 +63,15 @@
 
         </template>
       </a-table-column>
-      <a-table-column data-index="index">
-        <template v-slot="index">
-          <a-switch checked-children="线上" un-checked-children="线下" v-model:checked="state[index].online" @change="syncOnline(state[index].online, index)" />
-        </template>
-      </a-table-column>
+
       <a-table-column key="input" title="Comment" data-index="index">
         <template v-slot="index">
-          <a-textarea :autoSize="{ minRows: 1, maxRows: 5}" :placeholder="state[index].online?'请填写线上教学入口':'备注' " v-model="state[index].comment" @change="syncComment(state[index].comment, index)"/>
+          <a-textarea
+            :autoSize="{ minRows: 1, maxRows: 5}"
+            :placeholder="state[index].online?'请填写申请原因+线上教学入口':'备注' "
+            v-model="state[index].comment"
+            :style="state[index].online?{ width: '220px' }:{ width: '160px' }"
+            @change="syncComment(state[index].comment, index)"/>
         </template>
       </a-table-column>
     </a-table>
