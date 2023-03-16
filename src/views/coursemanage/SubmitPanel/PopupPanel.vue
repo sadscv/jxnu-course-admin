@@ -112,6 +112,8 @@ export default {
       type: Array
     },
     courseInfo: {
+    },
+    defaultWeek: {
     }
   },
   watch: {
@@ -163,41 +165,42 @@ export default {
     setCourseInfo (CourseInfo) {
       const processed = []
       this.pageSize = parseInt(9 / (CourseInfo.length / 17))
-      for (let i = 0; i < 17; i++) {
+      for (let i = 0; i < this.defaultWeek; i++) {
         processed.push(null)
-        }
+      }
       CourseInfo.forEach((row) => {
         const weekNum = parseInt(row.周次号)
-        this.weekUsageList[weekNum - 1].value = parseInt(row.当周开课) !== 0
-        if (processed[weekNum - 1] === null) {
-          processed[weekNum - 1] = {
-            key: weekNum,
-            courseWeek: weekNum - 1,
+        if (weekNum <= parseInt(this.defaultWeek)) {
+          this.weekUsageList[weekNum - 1].value = parseInt(row.当周开课) !== 0
+          if (processed[weekNum - 1] === null) {
+            processed[weekNum - 1] = {
+              key: weekNum,
+              courseWeek: weekNum - 1,
+              courseId: row.课程号,
+              classId: row.班级号,
+              comment: row.备注,
+              online: row.线上教学,
+              courseInfo: {
+                key: weekNum
+              },
+              weekStatus: {},
+              loadingStatus: false
+            }
+          }
+          const infoKey = row.星期号 + row.节次号
+          processed[weekNum - 1]['weekStatus'][infoKey] = {
             courseId: row.课程号,
             classId: row.班级号,
+            weekNum: weekNum,
+            key: infoKey,
+            week: row.meta.week,
+            date: row.meta.date,
+            oldClassroom: row.meta.classroom,
+            newClassroom: (row.临时教室号 ? row.临时教室号 : row.meta.classroom),
+            tags: (row.备选教室号 ? row.备选教室号.split(',') : []),
             comment: row.备注,
-            online: row.线上教学,
-            courseInfo: {
-              key: weekNum
-            },
-            weekStatus: {
-            },
-            loadingStatus: false
+            online: row.线上教学
           }
-        }
-        const infoKey = row.星期号 + row.节次号
-        processed[weekNum - 1]['weekStatus'][infoKey] = {
-          courseId: row.课程号,
-          classId: row.班级号,
-          weekNum: weekNum,
-          key: infoKey,
-          week: row.meta.week,
-          date: row.meta.date,
-          oldClassroom: row.meta.classroom,
-          newClassroom: (row.临时教室号 ? row.临时教室号 : row.meta.classroom),
-          tags: (row.备选教室号 ? row.备选教室号.split(',') : []),
-          comment: row.备注,
-          online: row.线上教学
         }
       })
 
@@ -211,7 +214,7 @@ export default {
     },
     initWeekUsageList () {
       const checkList = []
-      for (let i = 0; i < 17; i++) {
+      for (let i = 0; i < this.defaultWeek; i++) {
         checkList.push({
           key: `checked${i + 1}`,
           value: true,

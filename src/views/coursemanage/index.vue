@@ -76,6 +76,7 @@
           <template v-slot="action">
             <PopupPanel
               :course-info="getInfo(action.row)"
+              :default-week="getCourseWeek()"
             />
             <!--          <a-dropdown-button-->
             <!--            type="primary"-->
@@ -113,12 +114,30 @@
     },
     created () {
       this.$nextTick(() => {
+        this.updateData()
         this.LoadAllCourses()
        })
     },
     methods: {
     getInfo (row) {
       return row
+    },
+    getCourseWeek () {
+      const state = JSON.parse(JSON.stringify(this.$store.state))
+      console.log(state)
+      return state.courseWeek
+    },
+    updateData: function () {
+      // const hide = this.$message.loading('正在检查数据更新...', 0);
+      this.$store.dispatch('checkUpdateAllInfos').then((data) => {
+        if (data != null) {
+        } else {
+          this.$message.error('未获取到基础数据，请刷新页面重试！', 30)
+        }
+      }).catch(() => {
+        this.$message.error('更新基础数据时出错，请刷新页面重试！', 30)
+        this.$store.commit('LOADED', true)
+      })
     }
     },
     mixins: [introductionOpenerMixin, conflictSolvingMixin, LookupPanelMixin]

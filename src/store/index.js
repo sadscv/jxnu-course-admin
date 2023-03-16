@@ -28,6 +28,7 @@ export default new Vuex.Store({
     loaded: true,
     isAdmin: false,
     trimester: null, // 持久化
+    courseWeek: null,
     disabledDate: null,
     backend: null, // 持久化
     showIntroductionNotification: true,
@@ -52,6 +53,9 @@ export default new Vuex.Store({
     },
     TRIMESTER (state, value) {
       state.trimester = value
+    },
+    COURSE_WEEK (state, value) {
+      state.courseWeek = value
     },
     DISABLED_DATE (state, value) {
       state.disabledDate = value
@@ -102,6 +106,11 @@ export default new Vuex.Store({
           if (response['trimester'] !== context.state.trimester) {
             context.commit('TRIMESTER', response['trimester'])
             tasks.push(storage.set('trimester', response['trimester']))
+          }
+          if (response['course_week'] !== context.state.courseWeek) {
+            console.log('##', response['course_week'])
+            context.commit('COURSE_WEEK', response['course_week'])
+            tasks.push(storage.set('courseWeek', response['course_week']))
           }
           if (response['backend'] !== context.state.backend) {
             context.commit('BACKEND', response['backend'])

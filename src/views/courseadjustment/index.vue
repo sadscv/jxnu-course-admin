@@ -21,12 +21,25 @@
     },
     created () {
       this.$nextTick(() => {
-        // this.LoadAllCourses()
+        this.updateData()
        })
     },
     methods: {
     getInfo (row) {
       return row
+    },
+    updateData () {
+      // const hide = this.$message.loading('正在检查数据更新...', 0);
+      this.$store.dispatch('checkUpdateAllInfos').then((data) => {
+        if (data != null) {
+        } else {
+          this.$message.error('未获取到基础数据，请刷新页面重试！', 30)
+        }
+      }).catch(() => {
+        this.$message.error('更新基础数据时出错，请刷新页面重试！', 30)
+        this.$store.commit('LOADED', true)
+      })
+      return null
     }
     },
     mixins: []
