@@ -4,21 +4,28 @@
       :data-source="tableData"
       :customRow="customRow"
       size="small"
-      :showHeader="false"
+      :showHeader="isShowHeader()"
       :pagination="false"
-      :rowSelection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
     >
-      <a-table-column data-index="index">
-        <template v-slot="index">
-          <a-switch checked-children="线上" un-checked-children="线下" v-model:checked="state[index].online" @change="syncOnline(state[index].online, index)" />
+      <a-table-column data-index="index" title="调停课">
+        <template v-slot="index" >
+          <a-switch
+            checked-children="调停"
+            un-checked-children=""
+            v-model:checked="state[index].adjusted"
+            @change="syncAdjusted" />
         </template>
       </a-table-column>
-      <a-table-column key="week" title="Last Name" data-index="week" />
-      <a-table-column key="date" title="Date" data-index="date" />
-      <a-table-column key="index" title="Action" data-index="index">
+      <a-table-column data-index="index" title="线上教学">
+        <template v-slot="index">
+          <a-switch checked-children="线上" un-checked-children="" v-model:checked="state[index].online" @change="syncOnline(state[index].online, index)" />
+        </template>
+      </a-table-column>
+      <a-table-column key="week" title="星期" data-index="week" />
+      <a-table-column key="date" title="节次" data-index="date" />
+      <a-table-column key="index" title="地点" data-index="index">
         <template v-slot="index" >
           <a-space>
-            地点:
             <a-input
               size="default"
               :style="{ width: '130px' }"
@@ -31,7 +38,7 @@
 
         </template>
       </a-table-column>
-      <a-table-column key="tagList.key" title="Tags" data-index="tagList">
+      <a-table-column key="tagList.key" title="候补场地" data-index="tagList">
         <template v-slot="tagList">
           <a-input
             ref="`input-`+tagList.index"
@@ -64,7 +71,7 @@
         </template>
       </a-table-column>
 
-      <a-table-column key="input" title="Comment" data-index="index">
+      <a-table-column key="input" title="备注" data-index="index">
         <template v-slot="index">
           <a-textarea
             :autoSize="{ minRows: 1, maxRows: 5}"
@@ -86,8 +93,9 @@ export default ({
   props: {
     weekDetail: {
     },
-    loading: false,
-    enable: {}
+    enable: {},
+    showHeader: {},
+    loading: null
   },
   data () {
     return {
@@ -106,25 +114,25 @@ export default ({
       const stateObject = {}
       let weekNum = null
       Object.keys(weekDetail).forEach(function (key, index) {
+        weekNum = weekDetail[key].weekNum
         weekDetail[key].index = index
         weekDetail[key].loading = true
-        weekNum = weekDetail[key].weekNum
         weekDetail[key].tagList = {
           key: key,
           index: index,
           weekNum: weekDetail[key].weekNum,
           tags: weekDetail[key].tags
         }
-        weekDetail[key].index = index
         stateObject[index] = {
           key: key,
-          loading: false,
           index: index,
+          loading: false,
           inputVisible: false,
           inputValue: null,
           tags: weekDetail[key].tags,
           comment: weekDetail[key].comment,
           online: weekDetail[key].online === '1',
+          adjusted: weekDetail[key].adjusted,
           weekNum: weekDetail[key].weekNum
         }
         tableData.push(weekDetail[key])
@@ -160,12 +168,18 @@ export default ({
     syncComment (value, index) {
       this.tableData[index].comment = value
     },
+    syncAdjusted (value, index) {
+      this.tableData[index].adjusted = value
+    },
     syncOnline (value, index) {
       this.tableData[index].online = value
       if (value) {
-        this.$message.warn('特别提醒：非疫情等特殊原因不得申请线上教学！', 10)
+        this.$message.warn('特别提醒：未经教务处批准不得申请线上教学！', 10)
       }
       console.log(this.tableData[index])
+    },
+    isShowHeader () {
+      return this.showHeader
     },
     customRow (record, index) {
       if (!this.enable) {

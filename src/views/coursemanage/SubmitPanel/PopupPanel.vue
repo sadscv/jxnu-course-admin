@@ -10,8 +10,8 @@
     <a-modal
       :visible="visible"
       :confirm-loading="loading"
-      title="提交申请"
-      okText="提交申请"
+      title="提交报备"
+      okText="提交报备"
       width="1000px"
       layout="inline"
       @cancel="() => { handleCancel() }"
@@ -29,7 +29,13 @@
         </a-form-item>
 
         <a-form-item label="">
-          <a-table :data-source="columnData" size="small" :pagination="{ pageSize: this.pageSize }">
+          <a-table
+            :data-source="columnData"
+            size="small"
+            :fixed="true"
+            :pagination="{ pageSize: this.pageSize}"
+            :showHeader="false"
+          >
             <a-table-column title="周次" data-index="key">
               <template v-slot="key">
                 第{{ key }}周
@@ -37,16 +43,17 @@
             </a-table-column>
             <a-table-column title="开课" data-index="courseWeek">
               <template v-slot="courseWeek">
-                <a-switch v-model:checked="weekUsageList[courseWeek].value" size="small"/>
+                <a-switch v-model:checked="weekUsageList[courseWeek].value" checked-children="开课" un-checked-children="不开" size="middle"/>
               </template>
             </a-table-column>
-            <a-table-column title="勾选调停课" data-index="courseInfo">
+            <a-table-column data-index="courseInfo">
               <template v-slot="courseInfo">
                 <courseTimeTable
                   @syncCourseTime="setCourseTime"
                   @pushWeekChange="saveWeekChange"
                   @onAdjustCourse="setCourseAdjustInfo"
                   :weekDetail="getWeekStatus(courseInfo.key)"
+                  :showHeader="isShowHeader(courseInfo.key)"
                   :loading="getWeekLoadingStatus(courseInfo.key)"
                   :enable="weekUsageList[parseInt(courseInfo.key) - 1].value"
                 />
@@ -153,18 +160,21 @@ export default {
       })
       const _this = this
       this.loading = true
+      let msg = null
       saveCourseStatus(pushList).then(res => {
-        console.log(res)
+        msg = res
+        console.log('fuck', res)
       }).catch(() => {
-        _this.$message.error('内部错误，请重试', 10)
+        _this.$message.error(msg, 10)
       }).finally(() => {
+        this.$message.info(msg, 10)
         _this.loading = false
         _this.visible = false
       })
     },
     setCourseInfo (CourseInfo) {
       const processed = []
-      this.pageSize = parseInt(9 / (CourseInfo.length / 17))
+      this.pageSize = parseInt(9 / (CourseInfo.length / 18))
       for (let i = 0; i < this.defaultWeek; i++) {
         processed.push(null)
       }
@@ -180,6 +190,7 @@ export default {
               classId: row.班级号,
               comment: row.备注,
               online: row.线上教学,
+              adjusted: row.调停课表业务号,
               courseInfo: {
                 key: weekNum
               },
@@ -199,7 +210,8 @@ export default {
             newClassroom: (row.临时教室号 ? row.临时教室号 : row.meta.classroom),
             tags: (row.备选教室号 ? row.备选教室号.split(',') : []),
             comment: row.备注,
-            online: row.线上教学
+            online: row.线上教学,
+            adjusted: row.调停课表业务号
           }
         }
       })
@@ -208,6 +220,9 @@ export default {
     },
     getWeekStatus (week) {
       return this.columnData[parseInt(week) - 1]['weekStatus']
+    },
+    isShowHeader (key) {
+      return key % this.pageSize === 1
     },
     getWeekLoadingStatus (week) {
       return this.columnData[parseInt(week) - 1].loadingStatus
