@@ -80,7 +80,6 @@
         ref="table"
         size="default"
         rowKey="key"
-        :columns="columns"
         :data="loadData"
         :alert="true"
         :rowSelection="rowSelection"

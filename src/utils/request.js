@@ -26,15 +26,15 @@ const errorHandler = (error) => {
     }
     if (error.response.status === 401 && !(data.result && data.result.isLogin)) {
       notification.error({
-        message: 'Unauthorized',
-        description: 'Authorization verification failed'
+        message: '未授权或登录超时',
+        description: '权限验证失败'
       })
       if (token) {
         console.log('$$$$$$$$$$$$$$$', error, data)
         store.dispatch('Logout').then(() => {
           setTimeout(() => {
             window.location.reload()
-          }, 1500)
+          }, 1000)
         })
       }
     }

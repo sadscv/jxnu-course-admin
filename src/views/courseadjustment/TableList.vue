@@ -4,13 +4,18 @@
       <div class="table-page-search-wrapper">
         <a-form layout="inline">
           <a-row :gutter="48">
-            <a-col :md="8" :sm="24">
-              <a-form-item label="调停课编号">
-                <a-input v-model="queryParam.id" placeholder=""/>
+            <a-col :md="5" :sm="24">
+              <a-form-item label="课程管理单位">
+                <a-input v-model="queryParam.college" placeholder=""/>
               </a-form-item>
             </a-col>
-            <a-col :md="8" :sm="24">
-              <a-form-item label="当前状态">
+            <a-col :md="4" :sm="24">
+              <a-form-item label="任课教师">
+                <a-input v-model="queryParam.teacher" placeholder=""/>
+              </a-form-item>
+            </a-col>
+            <a-col :md="5" :sm="24">
+              <a-form-item label="调停课状态">
                 <a-select v-model="queryParam.status" placeholder="请选择" default-value="0">
                   <a-select-option value="0">待上传调停课表</a-select-option>
                   <a-select-option value="1">待完善补课信息</a-select-option>
@@ -19,21 +24,21 @@
                 </a-select>
               </a-form-item>
             </a-col>
-            <template v-if="advanced">
-              <a-col :md="8" :sm="24">
-                <a-form-item label="更新日期">
-                  <a-date-picker v-model="queryParam.date" format="YY-MM-DD" style="width: 100%" placeholder="请输入更新日期"/>
+            <template v-if="!advanced">
+              <a-col :md="5" :sm="24">
+                <a-form-item label="补课日期">
+                  <a-date-picker v-model="queryParam.date" format="YYYY-MM-DD" style="width: 100%" placeholder="请输入补课日期"/>
                 </a-form-item>
               </a-col>
             </template>
-            <a-col :md="!advanced && 8 || 24" :sm="24">
+            <a-col :md="5" :sm="24">
               <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
                 <a-button type="primary" @click="$refs.table.refresh(true)">查询</a-button>
-                <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">重置</a-button>
-                <a @click="toggleAdvanced" style="margin-left: 8px">
-                  {{ advanced ? '收起' : '展开' }}
-                  <a-icon :type="advanced ? 'up' : 'down'"/>
-                </a>
+                <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">清空</a-button>
+<!--                <a @click="toggleAdvanced" style="margin-left: 8px">-->
+<!--                  {{ advanced ? '收起' : '展开' }}-->
+<!--                  <a-icon :type="advanced ? 'up' : 'down'"/>-->
+<!--                </a>-->
               </span>
             </a-col>
           </a-row>
@@ -60,9 +65,7 @@
         rowKey="key"
         :columns="columns"
         :data="loadData"
-        :alert="true"
-        :rowSelection="rowSelection"
-        :showPagination="false"
+        :showPagination="true"
       >
         <span slot="serial" slot-scope="text, record, index">
           {{ index + 1 }}
@@ -84,7 +87,7 @@
         <span slot="action" slot-scope="text, record">
           <template>
             <a @click="handleEdit(record)">编辑</a>
-            <a-divider type="vertical" />
+<!--            <a-divider type="vertical" />-->
 <!--            <a @click="handleSub(record)">测试</a>-->
           </template>
         </span>

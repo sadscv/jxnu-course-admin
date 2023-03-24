@@ -124,7 +124,6 @@
     },
     getCourseWeek () {
       const state = JSON.parse(JSON.stringify(this.$store.state))
-      console.log(state)
       return state.courseWeek
     },
     updateData: function () {

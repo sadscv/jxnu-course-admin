@@ -11,7 +11,7 @@
       :visible="visible"
       :confirm-loading="loading"
       title="提交报备"
-      okText="提交报备"
+      :okText="submitButtonText"
       width="1000px"
       layout="inline"
       @cancel="() => { handleCancel() }"
@@ -43,7 +43,7 @@
             </a-table-column>
             <a-table-column title="开课" data-index="courseWeek">
               <template v-slot="courseWeek">
-                <a-switch v-model:checked="weekUsageList[courseWeek].value" checked-children="开课" un-checked-children="不开" size="middle"/>
+                <a-switch v-model:checked="weekUsageList[courseWeek].value" checked-children="开课" un-checked-children="不开"/>
               </template>
             </a-table-column>
             <a-table-column data-index="courseInfo">
@@ -63,15 +63,10 @@
         </a-form-item>
         <a-form-item>
           <template v-if="displayAdjustButton()">
-            <div style="margin-bottom: 16px" >
-              <span style="margin-left: 8px">
-                <b>调停课时段：</b>
-                {{ this.adjustedString }}
-              </span>
-              <a-button :loading="loading" @click="pushAdjustedCourse" type="primary" danger>
-                提交调停课
-              </a-button>
-            </div>
+            <span style="margin-left: 8px">
+              <b>调停课时段：</b>
+              {{ this.adjustedString }}
+            </span>
           </template>
         </a-form-item>
       </a-form>
@@ -83,6 +78,7 @@
 
 import courseTimeTable from '@/views/coursemanage/SubmitPanel/courseTimeTable'
 import { getCourseStatus, saveCourseStatus, saveWeekStatus, commitCourseAdjustment } from '@/api/manage'
+import moment from 'moment'
 
 export default {
   name: 'PopupPanel',
@@ -96,6 +92,7 @@ export default {
       teacher_id: null,
       college_name: null,
       columnData: null,
+      submitButtonText: '提交变更',
       pageSize: 10,
       weekUsageList: [],
       adjustedCourse: {},
@@ -146,9 +143,12 @@ export default {
       this.visible = false
     },
     handlePush () {
-      this.weekUsageList.forEach((usage, index) => {
-        this.columnData[index].enable = usage.value
-      })
+      if (this.displayAdjustButton()) {
+        this.pushAdjustedCourse()
+      }
+        this.weekUsageList.forEach((usage, index) => {
+          this.columnData[index].enable = usage.value
+        })
 
       const pushList = []
       this.columnData.forEach((week) => {
@@ -163,7 +163,6 @@ export default {
       let msg = null
       saveCourseStatus(pushList).then(res => {
         msg = res
-        console.log('fuck', res)
       }).catch(() => {
         _this.$message.error(msg, 10)
       }).finally(() => {
@@ -190,7 +189,7 @@ export default {
               classId: row.班级号,
               comment: row.备注,
               online: row.线上教学,
-              adjusted: row.调停课表业务号,
+              adjusted: row.调停课业务号,
               courseInfo: {
                 key: weekNum
               },
@@ -211,7 +210,8 @@ export default {
             tags: (row.备选教室号 ? row.备选教室号.split(',') : []),
             comment: row.备注,
             online: row.线上教学,
-            adjusted: row.调停课表业务号
+            adjusted: row.调停课业务号,
+            isAdjustDisabled: this.isAdjustDisabled(weekNum, row.星期号)
           }
         }
       })
@@ -250,27 +250,68 @@ export default {
       }
       this.adjustTimeCaculator(this.adjustedCourse)
     },
+    convertClasstimeDate (date) {
+      if (date === 1) {
+        return [1, 2]
+      } else if (date === 2) {
+        return [3]
+      } else if (date === 3) {
+        return [4]
+      } else if (date === 4) {
+        return [5]
+      } else if (date === 5) {
+        return [6, 7]
+      } else if (date === 6) {
+        return [8, 9]
+      } else if (date === 7) {
+        return [10, 11, 12]
+      }
+      return false
+    },
+    convertDateList (dateList) {
+      const processed = []
+      dateList.forEach((date) => {
+        console.log(this.convertClasstimeDate(date))
+        processed.push(...this.convertClasstimeDate(date))
+      })
+      const minDate = Math.min(...processed)
+      const maxDate = Math.max(...processed)
+      console.log('processed', processed, dateList, minDate, maxDate)
+      return (minDate + '-' + maxDate)
+    },
+    getDateByWeekNum (weekNum, week) {
+      const startDate = moment(this.$store.state.termStartDate)
+      const delta = (weekNum - 1) * 7 + (week - 1)
+      return startDate.add(delta, 'days')
+    },
+    isAdjustDisabled (weekNum, week) {
+      const day = this.getDateByWeekNum(weekNum, week)
+      console.log(moment().diff(day, 'days'))
+      return moment().diff(day, 'days') > 7
+    },
     adjustTimeCaculator (adjustedCourse) {
       let adjustedString = ''
+      const dateDict = {}
       for (const weekNum in adjustedCourse) {
-        const prefix = '第' + weekNum + '周'
-        let weekString = ''
-        adjustedCourse[weekNum].forEach((course) => {
-          console.log(course)
-        })
         for (const index in adjustedCourse[weekNum]) {
           const course = adjustedCourse[weekNum][index]
-          const week = course.week
-          const date = course.date
-          weekString += (week + date)
+          const week = course.key.substring(0, 1)
+          const date = course.key.substring(1, 2)
+          const courseDate = this.getDateByWeekNum(weekNum, week)
+          if (courseDate in dateDict) {
+            dateDict[courseDate].push(parseInt(date))
+          } else {
+            dateDict[courseDate] = [parseInt(date)]
+          }
         }
-        adjustedString += (prefix + '【' + weekString + '】')
+      }
+      for (const cDate in dateDict) {
+        adjustedString += (moment(cDate).format('YYYY-MM-DD') + '【' + this.convertDateList(dateDict[cDate]) + '节】')
       }
       this.adjustedString = adjustedString
     },
     saveWeekChange (info) {
       const parameter = JSON.parse(JSON.stringify(info))
-      console.log(parameter)
       info.forEach((weekInfo, index) => {
         parameter[index].tags = parameter[index].tags.toString()
       })
@@ -280,6 +321,11 @@ export default {
       })
     },
     displayAdjustButton () {
+      if (this.adjustedString.length > 0) {
+        this.submitButtonText = '提交调停课'
+      } else {
+        this.submitButtonText = '提交变更'
+      }
       return this.adjustedString.length > 0
     },
     pushAdjustedCourse () {

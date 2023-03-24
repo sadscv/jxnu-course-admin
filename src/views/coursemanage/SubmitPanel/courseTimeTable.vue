@@ -9,16 +9,21 @@
     >
       <a-table-column data-index="index" title="调停课">
         <template v-slot="index" >
-          <a-switch
-            checked-children="调停"
-            un-checked-children=""
-            v-model:checked="state[index].adjusted"
-            @change="syncAdjusted" />
+          <a-tooltip>
+            <template #title v-if="state[index].isAdjustDisabled && state[index].adjusted">历史调课记录不可撤销</template>
+            <a-switch
+              checked-children="调停"
+              un-checked-children=" "
+              v-model:checked="state[index].adjusted"
+              :disabled="state[index].isAdjustDisabled"
+              @change="syncAdjusted(state[index].adjusted, state[index].key, index)" />
+          </a-tooltip>
+
         </template>
       </a-table-column>
       <a-table-column data-index="index" title="线上教学">
         <template v-slot="index">
-          <a-switch checked-children="线上" un-checked-children="" v-model:checked="state[index].online" @change="syncOnline(state[index].online, index)" />
+          <a-switch checked-children="线上" un-checked-children=" " v-model:checked="state[index].online" @change="syncOnline(state[index].online, index)" />
         </template>
       </a-table-column>
       <a-table-column key="week" title="星期" data-index="week" />
@@ -132,7 +137,8 @@ export default ({
           tags: weekDetail[key].tags,
           comment: weekDetail[key].comment,
           online: weekDetail[key].online === '1',
-          adjusted: weekDetail[key].adjusted,
+          adjusted: !!weekDetail[key].adjusted,
+          isAdjustDisabled: weekDetail[key].isAdjustDisabled,
           weekNum: weekDetail[key].weekNum
         }
         tableData.push(weekDetail[key])
@@ -140,6 +146,7 @@ export default ({
       this.tableData = tableData
       this.state = stateObject
       this.weekNum = weekNum
+      this.adjustedRows = []
     }
     this.processWeekDetail()
   },
@@ -156,7 +163,6 @@ export default ({
     },
     handleClose (tag, index) {
       const count = Array.from(this.tableData[index].tags).indexOf(tag)
-      console.log(count)
       this.tableData[index].tags.splice(count, 1)
     },
     onChangeClassroom (index) {
@@ -168,22 +174,30 @@ export default ({
     syncComment (value, index) {
       this.tableData[index].comment = value
     },
-    syncAdjusted (value, index) {
-      this.tableData[index].adjusted = value
+    syncAdjusted (value, time, index) {
+      if (value) {
+        this.tableData[index].adjusted = value
+        this.adjustedRows.push(this.weekDetail[time])
+      } else {
+        this.tableData[index].adjusted = null
+        const toRemove = this.adjustedRows.indexOf(this.weekDetail[time])
+        if (toRemove > -1) {
+          this.adjustedRows.splice(toRemove, 1)
+        }
+      }
+      this.$emit('onAdjustCourse', this.adjustedRows, this.weekNum)
     },
     syncOnline (value, index) {
       this.tableData[index].online = value
       if (value) {
-        this.$message.warn('特别提醒：未经教务处批准不得申请线上教学！', 10)
+        this.$message.warn('特别提醒：未经教务处同意不得申请线上教学！', 10)
       }
-      console.log(this.tableData[index])
     },
     isShowHeader () {
       return this.showHeader
     },
     customRow (record, index) {
       if (!this.enable) {
-        console.log(record, index)
         return {
           style: {
             // color: record.remarkDesc ? record.remarkDesc.fontColor : '#262626',
