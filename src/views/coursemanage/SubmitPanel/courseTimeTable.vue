@@ -28,13 +28,12 @@
       </a-table-column>
       <a-table-column key="week" title="星期" data-index="week" />
       <a-table-column key="date" title="节次" data-index="date" />
-      <a-table-column key="index" title="地点" data-index="index">
+      <a-table-column key="index" title="临时变更场地" data-index="index">
         <template v-slot="index" >
           <a-space>
             <a-input
               size="default"
               :style="{ width: '130px' }"
-              :loading="loading"
               @search="onChangeClassroom(index)"
               v-model="tableData[index].newClassroom"
               allow-clear >

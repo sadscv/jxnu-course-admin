@@ -83,7 +83,6 @@
         :data="loadData"
         :alert="true"
         :rowSelection="rowSelection"
-        showPagination="auto"
       >
         <span slot="serial" slot-scope="text, record, index">
           {{ index + 1 }}

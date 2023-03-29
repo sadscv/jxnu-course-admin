@@ -137,6 +137,7 @@ export default {
       }).finally(() => {
         _this.loading = false
         _this.visible = true
+        _this.adjustedString = ''
       })
     },
     handleCancel () {
@@ -166,7 +167,9 @@ export default {
       }).catch(() => {
         _this.$message.error(msg, 10)
       }).finally(() => {
-        this.$message.info(msg, 10)
+        if (msg) {
+          this.$message.info(msg, 10)
+        }
         _this.loading = false
         _this.visible = false
       })
@@ -206,7 +209,7 @@ export default {
             week: row.meta.week,
             date: row.meta.date,
             oldClassroom: row.meta.classroom,
-            newClassroom: (row.临时教室号 ? row.临时教室号 : row.meta.classroom),
+            newClassroom: (row.临时教室号 ? row.临时教室号 : null),
             tags: (row.备选教室号 ? row.备选教室号.split(',') : []),
             comment: row.备注,
             online: row.线上教学,
@@ -228,6 +231,7 @@ export default {
       return this.columnData[parseInt(week) - 1].loadingStatus
     },
     initWeekUsageList () {
+      this.adjustedString = ''
       const checkList = []
       for (let i = 0; i < this.defaultWeek; i++) {
         checkList.push({
@@ -334,7 +338,10 @@ export default {
         'adjustmentInfo': this.adjustedCourse,
         'courseInfo': this.courseInfo
       }
-      commitCourseAdjustment(parameter).then(() => {
+      commitCourseAdjustment(parameter).then((result) => {
+        if (result !== '') {
+          this.$message.info(result, 10)
+        }
         this.loading = false
         this.visible = false
       })

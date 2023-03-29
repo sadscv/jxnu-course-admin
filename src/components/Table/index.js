@@ -147,8 +147,7 @@ export default {
       const parameter = Object.assign({
         pageNo: (pagination && pagination.current) ||
           this.showPagination && this.localPagination.current || this.pageNum,
-        pageSize: (pagination && pagination.pageSize) ||
-          this.showPagination && this.localPagination.pageSize || this.pageSize
+        pageSize: 1000
       },
       (sorter && sorter.field && {
         sortField: sorter.field
@@ -167,9 +166,8 @@ export default {
           this.localPagination = this.showPagination && Object.assign({}, this.localPagination, {
             current: r.pageNo, // 返回结果中的当前分页数
             total: r.totalCount, // 返回结果中的总记录数
-            showSizeChanger: this.showSizeChanger,
-            pageSize: (pagination && pagination.pageSize) ||
-              this.localPagination.pageSize
+            showSizeChanger: false,
+            pageSize: 1000,
           }) || false
           // 为防止删除数据后导致页面当前页面数据长度为 0 ,自动翻页到上一页
           if (r.data.length === 0 && this.showPagination && this.localPagination.current > 1) {

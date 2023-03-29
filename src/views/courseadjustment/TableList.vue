@@ -65,7 +65,7 @@
         rowKey="key"
         :columns="columns"
         :data="loadData"
-        :showPagination="true"
+        :showPagination="auto"
       >
         <span slot="serial" slot-scope="text, record, index">
           {{ index + 1 }}
