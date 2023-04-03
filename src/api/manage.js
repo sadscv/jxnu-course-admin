@@ -7,6 +7,7 @@ const api = {
   service: '/service',
   permission: '/permission',
   permissionNoPager: '/permission/no-pager',
+  selectedCourses: '/selected_courses',
   orgTree: '/org/tree',
   courseStatus: 'course_status',
   weekStatus: '/week_status',
@@ -115,9 +116,18 @@ export function commitCourseAdjustment (parameter) {
 }
 
 export function updateAdjustmentInfo (parameter) {
-  console.log('fsafsafasfasdf')
   return request({
     url: api.updateAdjustment,
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: parameter
+  })
+}
+export function getStudentSelectedCourses (parameter) {
+  return request({
+    url: api.selectedCourses,
     method: 'post',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'
