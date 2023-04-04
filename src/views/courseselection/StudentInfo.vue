@@ -16,6 +16,7 @@
         <a-form-item label="学院" layout="inline"> {{ this.stuInfo.单位 }} </a-form-item>
         <a-form-item label="专业" layout="inline"> {{ this.stuInfo.专业 }}</a-form-item>
         <a-form-item label="班级" layout="inline"> {{ this.stuInfo.班级 }} </a-form-item>
+        <a-table size="small" :pagination="false" :dataSource="this.selectedCourses" :columns="this.columns"></a-table>
       </div>
 
     </a-form></a-space>
@@ -41,7 +42,38 @@ export default {
       loading: false,
       studentId: null,
       stuInfo: null,
-      selectedCourses: []
+      selectedCourses: [],
+      dataSource: [
+          {
+            key: '1',
+            name: '胡彦斌',
+            age: 32,
+            address: '西湖区湖底公园1号'
+          },
+          {
+            key: '2',
+            name: '胡彦祖',
+            age: 42,
+            address: '西湖区湖底公园1号'
+          }
+        ],
+      columns: [
+          {
+            title: '课程名称',
+            dataIndex: '课程名称',
+            key: 'name'
+          },
+          {
+            title: '班级名称',
+            dataIndex: '班级名称',
+            key: '班级名称'
+          },
+          {
+            title: '状态',
+            dataIndex: '状态',
+            key: '已选课程'
+          }
+        ]
     }
   },
   methods: {
@@ -64,6 +96,9 @@ export default {
       } else {
         this.$message.error(result)
         this.stuInfo = null
+      }
+      if (result.hasOwnProperty('selected')) {
+        this.selectedCourses = result.selected
       }
     }
   }
