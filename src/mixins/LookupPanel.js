@@ -24,10 +24,10 @@ export const LookupPanelMixin = {
     '$store.state.allClasses' () {
       this.countdown(0, false) // 避免重复执行筛选
     },
-    '$store.state.selectedClasses' () {
+    '$store.state.selectedCourses' () {
       this.countdown(0, false) // 避免重复执行筛选
     },
-    '$store.state.reservedClasses' () {
+    '$store.state.reservedCourses' () {
       this.countdown(0, false) // 避免重复执行筛选
     }
   },
@@ -60,7 +60,7 @@ export const LookupPanelMixin = {
       const state = JSON.parse(JSON.stringify(this.$store.state))
       return this.promiseWorker.postMessage({
         allClasses: this.$store.state.course.allCourses,
-        reservedClasses: this.$store.state.reservedClasses,
+        reservedCourses: this.$store.state.reservedCourses,
         selectedClasses: this.$store.state.selectedClasses,
         scheduleTableRows: this.$store.getters.scheduleTableRows,
         allClassesExtra: this.$store.state.allClassesExtra,

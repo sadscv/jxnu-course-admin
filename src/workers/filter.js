@@ -31,6 +31,10 @@ function concatRegExp (parts) {
 }
 
 registerPromiseWorker(function (message) {
+  const isSelected = (data) => {
+    return data['course_id'] in message.reservedCourses &&
+      data['class_id'] === message.reservedCourses[data['course_id']].class_id
+  }
   // const isReserved = (data) => {
   //   if (message.reservedClasses.hasOwnProperty(data['course_id'])) {
   //     if (message.reservedClasses[data['course_id']].classes.hasOwnProperty(data['class_id'])) {
@@ -111,7 +115,6 @@ registerPromiseWorker(function (message) {
       conditionsRegExp[condition] = concatRegExp(message.conditions.search[condition].split(/\s+/))
     }
   }
-  console.log('message', message)
   message.allClasses.forEach((row) => {
     if (isNumberLower(row, message.conditions.number)) {
       return
@@ -157,13 +160,13 @@ registerPromiseWorker(function (message) {
       key: `${newRow['course_id']}-${newRow['class_id']}`,
       isSelected: true,
       canPreview: getPeriods(newRow['class_time']).length > 0,
-      conflicts: false,
+      conflicts: false
     }
     newRow['action'] = {
       row: row,
       isReserved: true,
       // isReserved: isReserved(row),
-      isSelected: newRow['class_time_info'].isSelected,
+      isSelected: isSelected(row),
       conflicts: newRow['class_time_info'].conflicts
     }
     newRow['key'] = `${newRow['course_id']}-${newRow['class_id']}`

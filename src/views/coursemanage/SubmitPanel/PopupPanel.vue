@@ -5,7 +5,7 @@
       :loading="loading"
       @click="showModal"
     >
-      变更申请
+      变更报备
     </a-button>
     <a-modal
       :visible="visible"
@@ -22,6 +22,12 @@
         <a-form-item label="课程名称" layout="horizontal"> <a>{{ courseInfo.course_name }}</a> </a-form-item>
         <a-form-item label="班级名称" layout="inline"> <a>{{ courseInfo.class_name }}</a> </a-form-item>
         <a-form-item label="任课教师" layout="inline"> <a>{{ courseInfo.teacher_name }}</a> </a-form-item>
+        <a-form-item label="上课时间" layout="inline"> <a>{{ courseInfo.class_time.toString() }}</a> </a-form-item>
+        <a-form-item label="上课地点" layout="inline"> <a>{{ courseInfo.classrooms.toString() }}</a> </a-form-item>
+        <a-form-item label="更换教室" layout="inline"> <button>test</button> </a-form-item>
+        <div>
+          <h1>test</h1>
+        </div>
         <a-form-item label="开课周次">
           <div>
             <a-checkable-tag type="danger" v-for="check in weekUsageList" :key="check.key" v-model:checked="check.value">{{ check.week }}</a-checkable-tag>

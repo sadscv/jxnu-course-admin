@@ -1,10 +1,10 @@
 <template>
   <page-header-wrapper :title="false">
     <div class="student-info-panel-wrapper">
-      <div style="width: 25%; float:left">
+      <div style="width: 29%; float:left">
         <StudentInfo/>
       </div>
-      <div style="width: 74%; float:right">
+      <div style="width: 70%; float:right">
         <CourseTable/>
       </div>
     </div>

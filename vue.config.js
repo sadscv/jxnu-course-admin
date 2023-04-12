@@ -28,7 +28,13 @@ const assetsCDN = {
     vuex: 'Vuex',
     axios: 'axios'
   },
-  css: []
+  css: [],
+  js: [
+    '//cdn.staticfile.org/npm/vue@2.6.14/dist/vue.min.js',
+    '//cdn.staticfile.org/npm/vue-router@3.5.1/dist/vue-router.min.js',
+    '//cdn.staticfile.org/npm/vuex@3.1.1/dist/vuex.min.js',
+    '//cdn.staticfile.org/npm/axios@0.21.1/dist/axios.min.js'
+  ]
 }
 
 // vue.config.js

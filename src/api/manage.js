@@ -8,6 +8,7 @@ const api = {
   permission: '/permission',
   permissionNoPager: '/permission/no-pager',
   selectedCourses: '/selected_courses',
+  reserveCourse: '/reserve_course',
   orgTree: '/org/tree',
   courseStatus: 'course_status',
   weekStatus: '/week_status',
@@ -128,6 +129,17 @@ export function updateAdjustmentInfo (parameter) {
 export function getStudentSelectedCourses (parameter) {
   return request({
     url: api.selectedCourses,
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: parameter
+  })
+}
+
+export function reserveCourse (parameter) {
+  return request({
+    url: api.reserveCourse,
     method: 'post',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'

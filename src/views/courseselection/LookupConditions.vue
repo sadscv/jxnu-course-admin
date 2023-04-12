@@ -1,14 +1,14 @@
 <template>
   <a-card class="lookup-conditions" size="small">
     <a-form ref="form" layout="inline">
+      <a-form-item label="课程号">
+        <a-input class="w-80px" v-model="conditions.search['course_id']" allow-clear />
+      </a-form-item>
       <a-form-item label="课程名称">
         <a-input class="w-120px" v-model="conditions.search['course_name']" allow-clear />
       </a-form-item>
       <a-form-item label="班级名称">
         <a-input class="w-120px" v-model="conditions.search['class_name']" allow-clear />
-      </a-form-item>
-      <a-form-item label="课程号">
-        <a-input class="w-80px" v-model="conditions.search['course_id']" allow-clear />
       </a-form-item>
       <a-form-item label="学分数">
         <a-input class="w-60px" v-model="conditions.search['credit']" allow-clear />

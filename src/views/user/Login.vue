@@ -230,7 +230,7 @@ export default {
           this.$message.error('未获取到基础数据，请刷新页面重试！', 30)
         }
       }).catch(() => {
-        this.$message.error('更新课程aaa数据时出错，请刷新页面重试！', 30)
+        this.$message.error('更新课程数据时出错，请刷新页面重试！', 30)
         this.$store.commit('LOADED', true)
       })
     }

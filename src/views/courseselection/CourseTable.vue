@@ -61,15 +61,36 @@
         <div slot="title" class="about-data-wrapper">
           <a-popover placement="leftBottom">
             <div slot="content" class="about-data">
-              * 仅限在教学时间不变情况下的教学场地调整报备<br />
-              * <strong>教学时间变更请提交调停课申请表</strong>
+              * <strong>注意事项,待补充</strong>
             </div>
             <a-button size="small" type="link" icon="info-circle">说明</a-button>
           </a-popover>
         </div>
         <template v-slot="action">
 
-          <a-button type="primary" >选课</a-button>
+<!--          <a-button-->
+<!--            type="primary"-->
+<!--            @click="selectCourse(action.row, false)">-->
+<!--            选课-->
+<!--          </a-button>-->
+          <a-button
+            v-if="!action.isSelected"
+            type="primary"
+            :disabled="storageBusy"
+            @click="selectCourse(action.row, false)"
+          >
+            <a-icon type="plus-circle" />
+            选择
+          </a-button>
+          <a-button
+            v-else
+            type="dashed"
+            :disabled="storageBusy"
+            @click="unselectCourse(action.row)"
+          >
+            <a-icon type="minus-circle" />
+            已选
+          </a-button>
         </template>
       </a-table-column>
 
@@ -90,36 +111,44 @@
   export default {
     name: 'CourseTable',
     components: {
-        ATableColumn,
+      ATableColumn,
       NumberCapacity,
-      LookupConditions,
+      LookupConditions
     },
     created () {
       this.$nextTick(() => {
         this.updateData()
         this.LoadAllCourses()
-       })
+      })
     },
     methods: {
-    getInfo (row) {
-      return row
-    },
-    getCourseWeek () {
-      const state = JSON.parse(JSON.stringify(this.$store.state))
-      return state.courseWeek
-    },
-    updateData: function () {
-      // const hide = this.$message.loading('正在检查数据更新...', 0);
-      this.$store.dispatch('checkUpdateAllInfos').then((data) => {
-        if (data != null) {
-        } else {
-          this.$message.error('未获取到基础数据，请刷新页面重试！', 30)
-        }
-      }).catch(() => {
-        this.$message.error('更新基础数据时出错，请刷新页面重试！', 30)
-        this.$store.commit('LOADED', true)
-      })
-    }
+      getInfo (row) {
+        return row
+      },
+      getCourseWeek () {
+        const state = JSON.parse(JSON.stringify(this.$store.state))
+        return state.courseWeek
+      },
+      updateData: function () {
+        // const hide = this.$message.loading('正在检查数据更新...', 0);
+        this.$store.dispatch('checkUpdateAllInfos').then((data) => {
+          if (data != null) {
+          } else {
+            this.$message.error('未获取到基础数据，请刷新页面重试！', 30)
+          }
+        }).catch(() => {
+          this.$message.error('更新基础数据时出错，请刷新页面重试！', 30)
+          this.$store.commit('LOADED', true)
+        })
+      },
+      selectCourse (data, select) {
+        this.storageBusy = true
+        this.$store.dispatch('reserveCourse', data)
+      },
+      unselectCourse (data) {
+        this.storageBusy = true
+        this.$store.dispatch('unreserveCourse', data)
+      }
     },
     mixins: [introductionOpenerMixin, conflictSolvingMixin, LookupPanelMixin]
   }

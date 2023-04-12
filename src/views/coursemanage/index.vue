@@ -48,13 +48,13 @@
         </a-table-column>
         <a-table-column title="上课时间" data-index="class_time_info">
           <template v-slot="class_time_info">
-            {{ class_time_info.row['class_time'] }}
+            {{ class_time_info.row['class_time'].toString() }}
           </template>
         </a-table-column>
 
         <a-table-column title="地点" data-index="classroom">
           <template v-slot="classroom">
-            {{ classroom.classroom_id }}
+            {{ classroom.classroom_id.toString() }}
           </template>
         </a-table-column>
         <a-table-column title="备注" data-index="venue">

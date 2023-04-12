@@ -6,13 +6,13 @@ import user from './modules/user'
 import course from './modules/course'
 // default router permission control
 // import permission from './modules/permission'
-
 // dynamic router permission control (Experimental)
 import permission from './modules/async-router'
 import getters from './getters'
-import { getAllInfo } from '@/api/base'
+import {getAllInfo} from '@/api/base'
 import moment from 'moment'
 import storage from 'store'
+import {getStudentSelectedCourses} from '@/api/manage'
 // import axios from 'axios'
 
 Vue.use(Vuex)
@@ -41,9 +41,11 @@ export default new Vuex.Store({
     allClassroomHash: null,
     allInfosExtra: null,
     allInfosExtraUpdateTime: null,
-    reservedClassroom: {}, // 持久化
+    selectedCourses: [],
+    reservedCourses: {}, // 持久化
     currentTeacher: {},
-    lastUpdateTime: null
+    lastUpdateTime: null,
+    studentInfo: {}
   },
   mutations: {
     LOADED (state, value) {
@@ -91,14 +93,20 @@ export default new Vuex.Store({
     ALL_INFOS_EXTRA_UPDATE_TIME (state, value) {
       state.allInfosExtraUpdateTime = value
     },
-    RESERVED_CLASSROOM (state, value) {
-      state.reservedClassroom = value
+    RESERVED_COURSES (state, value) {
+      state.reservedCourses = value
+    },
+    SELECTED_COURSES (state, value) {
+      state.selectedCourses = value
     },
     CURRENT_TEACHER (state, value) {
       state.currentTeacher = value
     },
     LAST_UPDATE_TIME (state, value) {
       state.lastUpdateTime = value
+    },
+    STUDENT_INFO (state, value) {
+      state.studentInfo = value
     }
   },
   actions: {
@@ -143,6 +151,96 @@ export default new Vuex.Store({
           // eslint-disable-next-line prefer-promise-reject-errors
           reject()
         })
+      })
+    },
+    reserveCourse (context, data) {
+      // 添加待选教室
+      const tasks = []
+      return new Promise((resolve) => {
+        const selectedCopy = JSON.parse(JSON.stringify(context.state.selectedCourses))
+        const reservedCopy = JSON.parse(JSON.stringify(context.state.reservedCourses))
+        if (!(selectedCopy && selectedCopy.every(item => item.课程名称 !== data['course_name']))) {
+          Vue.prototype.$message.error('已选择本课程的平行班')
+        } else if (Object.keys(reservedCopy).length + selectedCopy.filter(item => item.状态 === '待教务处审核').length >= 4) {
+          Vue.prototype.$message.error('每学期增选课程门数上限为4门')
+        } else {
+          selectedCopy.push(
+            {
+              '课程名称': data['course_name'],
+              '班级名称': data['class_name'],
+              '状态': '待提交'
+            })
+          const courseId = data['course_id']
+          if (!reservedCopy.hasOwnProperty(courseId)) {
+            reservedCopy[courseId] = data
+          }
+        }
+        context.commit('RESERVED_COURSES', reservedCopy)
+        context.commit('SELECTED_COURSES', selectedCopy)
+        tasks.push(storage.set('reservedCourses', reservedCopy))
+        tasks.push(storage.set('selectedCourses', selectedCopy))
+        Promise.all(tasks).then(() => {
+          resolve()
+        })
+      })
+    },
+    unreserveCourse (context, data) {
+      console.log(data)
+      const courseId = data['course_id']
+      const tasks = []
+      return new Promise((resolve) => {
+        let selectedCopy = JSON.parse(JSON.stringify(context.state.selectedCourses))
+        const reservedCopy = JSON.parse(JSON.stringify(context.state.reservedCourses))
+        selectedCopy = selectedCopy.filter(item => item.课程名称 !== data['course_name'])
+
+        if (reservedCopy.hasOwnProperty(courseId)) {
+          delete reservedCopy[courseId]
+        }
+        context.commit('RESERVED_COURSES', reservedCopy)
+        context.commit('SELECTED_COURSES', selectedCopy)
+        tasks.push(storage.set('reservedCourses', reservedCopy))
+        tasks.push(storage.set('selectedCourses', selectedCopy))
+        Promise.all(tasks).then(() => {
+          resolve()
+        })
+      })
+    },
+    clearSelectedAndReservedCourse (context) {
+      const tasks = []
+      return new Promise((resolve) => {
+        const selectedCopy = {}
+        const reservedCopy = {}
+
+        context.commit('RESERVED_COURSES', reservedCopy)
+        context.commit('SELECTED_COURSES', selectedCopy)
+        tasks.push(storage.set('reservedCourses', reservedCopy))
+        tasks.push(storage.set('selectedCourses', selectedCopy))
+        Promise.all(tasks).then(() => {
+          resolve()
+        })
+      })
+    },
+    getSelectedCourses (context, data) {
+      return new Promise((resolve) => {
+        const params = {
+        'stu_id': data
+        }
+        getStudentSelectedCourses(params).then(res => {
+          const tasks = []
+          if (res.hasOwnProperty('stu_info') && res['stu_info'] !== context.state.studentInfo) {
+            context.commit('STUDENT_INFO', res['stu_info'])
+            tasks.push(storage.set('studentInfo', res['stu_info']))
+          }
+          if (res.hasOwnProperty('selected') && res['selected'] !== context.state.selectedCourses) {
+            context.commit('SELECTED_COURSES', res['selected'])
+            tasks.push(storage.set('selectedCourses', res['selected']))
+          }
+          Promise.all(tasks).then(() => {
+            resolve(res)
+          })
+        }).catch((err) => {
+        }).finally(() => {
+      })
       })
     }
   },
