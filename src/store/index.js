@@ -161,8 +161,8 @@ export default new Vuex.Store({
         const reservedCopy = JSON.parse(JSON.stringify(context.state.reservedCourses))
         if (!(selectedCopy && selectedCopy.every(item => item.课程名称 !== data['course_name']))) {
           Vue.prototype.$message.error('已选择本课程的平行班')
-        } else if (Object.keys(reservedCopy).length + selectedCopy.filter(item => item.状态 === '待教务处审核').length >= 4) {
-          Vue.prototype.$message.error('每学期增选课程门数上限为4门')
+        } else if (Object.keys(reservedCopy).length + selectedCopy.filter(item => item.状态 === '待教务处审核').length >= 2) {
+          Vue.prototype.$message.error('每学期增选课程门数上限为2门')
         } else {
           selectedCopy.push(
             {

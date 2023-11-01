@@ -78,12 +78,6 @@
               :course-info="getInfo(action.row)"
               :default-week="getCourseWeek()"
             />
-            <!--          <a-dropdown-button-->
-            <!--            type="primary"-->
-            <!--            :disabled="storageBusy"-->
-            <!--            @click="updateCourseInfo(action.row, false)"-->
-            <!--          >-->
-            <!--          </a-dropdown-button>-->
           </template>
         </a-table-column>
 

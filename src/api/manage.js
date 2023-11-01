@@ -13,7 +13,9 @@ const api = {
   courseStatus: 'course_status',
   weekStatus: '/week_status',
   adjustCourse: '/adjust_course',
-  updateAdjustment: '/update_adjustment'
+  updateAdjustment: '/update_adjustment',
+  allClassrooms: '/all_classrooms',
+  replaceClassroom: '/replace_classroom'
 }
 
 export default api
@@ -140,6 +142,25 @@ export function getStudentSelectedCourses (parameter) {
 export function reserveCourse (parameter) {
   return request({
     url: api.reserveCourse,
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: parameter
+  })
+}
+
+export function getAllClassroomList (parameter) {
+  return request({
+    url: api.allClassrooms,
+    method: 'get',
+    params: parameter
+  })
+}
+
+export function replaceClassroom (parameter) {
+  return request({
+    url: api.replaceClassroom,
     method: 'post',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'
