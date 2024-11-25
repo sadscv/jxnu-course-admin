@@ -32,13 +32,16 @@ const assetsCDN = {
   // https://unpkg.com/browse/vue@2.6.10/
   js: [
     // '//lf6-cdn-tos.bytecdntp.com/cdn/expire-100-y/vue/2.6.4/vue.min.js',
-    '//cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js',
+    '//cdn.staticfile.net/vue/2.6.14/vue.min.js',
+    // '//cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js',
     // '//lf26-cdn-tos.bytecdntp.com/cdn/expire-100-y/vue-router/3.5.1/vue-router.min.js',
-    '//cdn.jsdelivr.net/npm/vue-router@3.5.1/dist/vue-router.min.js',
+    // '//cdn.jsdelivr.net/npm/vue-router@3.5.1/dist/vue-router.min.js',
+    '//cdn.staticfile.net/vue-router/3.5.1/vue-router.min.js',
     // '//lf6-cdn-tos.bytecdntp.com/cdn/expire-100-y/vuex/3.1.1/vuex.min.js',
-    '//cdn.jsdelivr.net/npm/vuex@3.1.1/dist/vuex.min.js',
+    // '//cdn.jsdelivr.net/npm/vuex@3.1.1/dist/vuex.min.js',
+    '//cdn.staticfile.net/vuex/3.1.1/vuex.min.js',
     // '//lf26-cdn-tos.bytecdntp.com/cdn/expire-100-y/axios/0.21.1/axios.min.js',
-    '//cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js'
+    '//cdn.staticfile.net/axios/0.21.1/axios.min.js'
   ]
 }
 
@@ -115,8 +118,8 @@ const vueConfig = {
     // If you want to turn on the proxy, please remove the mockjs /src/main.jsL11
     proxy: {
       '/API/v1.0': {
-        target: 'http://219.229.250.21:8080',
-        // target: 'http://127.0.0.1:5000',
+        // target: 'http://219.229.250.21:8080',
+        target: 'http://127.0.0.1:5000',
         // target: 'http://150.158.195.65:7015',
         secure: false,
         ws: false,

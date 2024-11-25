@@ -1,3 +1,159 @@
+
+  <a-modal
+    title="新建规则"
+    :width="640"
+    :visible="visible"
+    :confirmLoading="loading"
+    @ok="handleOk"
+    @cancel="() => { $emit('cancel') }"
+  >
+    <a-spin :spinning="loading">
+      <a-form :form="form" v-bind="formLayout">
+        <!-- 其他表单项 -->
+
+        <a-form-item label="调停课表">
+          <a-upload
+            v-decorator="['调停课表附件']"
+            ref="uploader"
+            action="/API/v1.0/upload_adjustment"
+            list-type="text"
+            :file-list="uploadFileList"
+            :before-upload="beforeUpload"
+            :onPreview="handlePreview"
+            @change="handleChange"
+          >
+            <a-button>点击上传</a-button>
+          </a-upload>
+        </a-form-item>
+
+        <!-- 其他表单项 -->
+      </a-form>
+    </a-spin>
+  </a-modal>
+</template>
+
+<script>
+import pick from 'lodash.pick'
+
+const fields = ['description', 'id', '补课日期', '补课时段描述', '补课地点描述', '调停课表附件', '调停课事由', '备注']
+
+export default {
+  props: {
+    visible: {
+      type: Boolean,
+      required: true
+    },
+    loading: {
+      type: Boolean,
+      default: () => false
+    },
+    model: {
+      type: Object,
+      default: () => null
+    }
+  },
+  data () {
+    return {
+      formLayout: {
+        labelCol: {
+          xs: { span: 24 },
+          sm: { span: 7 }
+        },
+        wrapperCol: {
+          xs: { span: 24 },
+          sm: { span: 13 }
+        }
+      },
+      options: [
+        {
+          value: 'test',
+          label: 'option1',
+          children: [
+            {
+              value: 'child_1',
+              label: 'child_1'
+            }
+          ]
+        }
+      ],
+      form: this.$form.createForm(this),
+      uploadFileList: []
+    }
+  },
+  methods: {
+    beforeUpload (file) {
+      const { type, size } = file
+      const limitType = type === 'image/jpeg' || type === 'image/png' || type === 'application/pdf'
+      if (!limitType) {
+        this.$message.error('请上传 JPG、PNG 格式图片或 PDF 文档!')
+      }
+      const limitSize = size / 1024 / 1024 < 10
+      if (!limitSize) {
+        this.$message.error('文件不可大于 10MB!')
+      }
+      return limitType && limitSize
+    },
+    handleChange (fileInfo) {
+      const adjustmentInfo = []
+      const resFileList = [...fileInfo.fileList]
+      this.form.getFieldDecorator('调停课表信息', { initialValue: '' })
+      for (const key in resFileList) {
+        const file = resFileList[key]
+        if (file.status === 'done') {
+          const info = {
+            name: file.name,
+            status: file.status,
+            url: file.response && file.response.url ? file.response.url : file.url
+          }
+          adjustmentInfo.push(info)
+        }
+      }
+      this.form.setFieldsValue({ '调停课表信息': adjustmentInfo })
+      this.uploadFileList = resFileList
+    },
+    handlePreview (file) {
+      if (file.url) {
+        if (file.name.endsWith('.pdf')) {
+          // 如果是 PDF 文件，直接下载
+          this.downloadFile(file.url, file.name)
+        } else {
+          // 如果不是 PDF 文件，继续使用默认行为
+          window.open(file.url, '_blank')
+        }
+      }
+    },
+    downloadFile (url, filename) {
+      // 创建一个临时的链接元素用于触发下载
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    },
+    handleOk () {
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          this.$emit('ok', values)
+        }
+      })
+    }
+  },
+  created () {
+    fields.forEach(v => this.form.getFieldDecorator(v))
+    this.$watch('model', () => {
+      if (this.model) {
+        this.form.setFieldsValue(pick(this.model, fields))
+        const attachmentInfo = pick(this.model, fields)['调停课表附件']
+        const attachments = attachmentInfo ? JSON.parse(attachmentInfo) : []
+        this.form.setFieldsValue({ '调停课表信息': attachments })
+        this.uploadFileList = attachments.map((att, index) => ({ ...att, uid: index }))
+      }
+    })
+  }
+}
+</script>
+
 <template>
   <a-modal
     title="新建规则"
@@ -40,12 +196,25 @@
             list-type="text"
             :file-list="uploadFileList"
             :before-upload="beforeUpload"
+            :onPreview="handlePreview"
             @change="handleChange"
           >
-            <a-button>
-              点击上传
-            </a-button>
+            <a-button>点击上传</a-button>
           </a-upload>
+        </a-form-item>
+        <a-form-item label="调停课类别">
+          <a-dropdown>
+            <a-cascader
+              v-model="value"
+              :options="options"
+              :show-search="{ filter }"
+              placeholder="请选择"
+            />
+            <a-select>
+              <a-select-option value="123">345</a-select-option>
+              <a-select-option value="1234">3456</a-select-option>
+            </a-select>
+          </a-dropdown>
         </a-form-item>
       </a-form>
     </a-spin>
@@ -82,7 +251,29 @@ export default {
       wrapperCol: {
         xs: { span: 24 },
         sm: { span: 13 }
-      }
+      },
+      options: [
+        {
+          value: 'test',
+          label: 'option1',
+          children: [
+            {
+              value: 'child_1',
+              label: 'child_1'
+            }
+          ]
+        },
+        {
+          value: 'test',
+          label: 'option1',
+          children: [
+            {
+              value: 'child_1',
+              label: 'child_1'
+            }
+          ]
+        }
+      ]
     }
     return {
       // form: this.getFormValue()
@@ -128,12 +319,60 @@ export default {
       }
       return limitType && limitSize
     },
+    handlePreview (file) {
+      if (file.url) {
+        if (file.name.endsWith('.pdf')) {
+          // 如果是 PDF 文件，直接下载
+          this.downloadFile(file.url, file.name)
+        } else {
+          // 如果不是 PDF 文件，继续使用默认行为
+          window.open(file.url, '_blank')
+        }
+      }
+    },
+    downloadFile (url, filename) {
+      // 创建一个临时的链接元素用于触发下载
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    },
+    handleOk () {
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          this.$emit('ok', values)
+        }
+      })
+    },
 
     getFormValue () {
       const form = this.$form.createForm(this)
       console.log(form)
       return form
+    },
+    renderUploadItem (file) {
+    if (file.status === 'done' && file.type === 'application/pdf') {
+      // 如果文件是 PDF 类型，则设置为下载模式
+      return (
+        <a-list-item>
+          <a href={file.url} download target="_blank" rel="noopener noreferrer">
+            {file.name}
+          </a>
+        </a-list-item>
+      )
+    } else {
+      // 非 PDF 文件保持正常展示
+      return (
+        <a-list-item>
+          <a href={file.url} target="_blank" rel="noopener noreferrer">
+            {file.name}
+          </a>
+        </a-list-item>
+      )
     }
+  }
   },
   created () {
     console.log('custom modal created')
