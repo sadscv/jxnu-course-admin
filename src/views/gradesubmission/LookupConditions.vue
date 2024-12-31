@@ -2,60 +2,101 @@
   <a-card class="lookup-conditions" size="small">
     <a-form ref="form" layout="inline">
       <a-form-item label="单位名称">
-        <a-input class="w-120px" v-model="conditions.search['college']" allow-clear />
+        <a-input class="w-120px" v-model="queryParams.collegeName" allow-clear />
       </a-form-item>
       <a-form-item label="课程名称">
-        <a-input class="w-120px" v-model="conditions.search['course_name']" allow-clear />
-      </a-form-item>
-      <a-form-item label="班级名称">
-        <a-input class="w-120px" v-model="conditions.search['class_name']" allow-clear />
+        <a-input class="w-120px" v-model="queryParams.courseName" allow-clear />
       </a-form-item>
       <a-form-item label="课程号">
-        <a-input class="w-80px" v-model="conditions.search['course_id']" allow-clear />
+        <a-input class="w-80px" v-model="queryParams.courseId" allow-clear />
       </a-form-item>
-      <a-form-item label="学分数">
-        <a-input class="w-60px" v-model="conditions.search['credit']" allow-clear />
+      <a-form-item label="班级名称">
+        <a-input class="w-120px" v-model="queryParams.className" allow-clear />
       </a-form-item>
-      <a-form-item label="教师号">
-        <a-input class="w-100px" v-model="conditions.search['teacher_id']" allow-clear />
+      <a-form-item label="教师工号">
+        <a-input class="w-100px" v-model="queryParams.teacherId" allow-clear />
       </a-form-item>
       <a-form-item label="教师姓名">
-        <a-input class="w-100px" v-model="conditions.search['teacher_name']" allow-clear />
+        <a-input class="w-100px" v-model="queryParams.teacherName" allow-clear />
       </a-form-item>
-      <a-form-item label="上课时间">
-        <a-input class="w-100px" v-model="conditions.search['class_time']" allow-clear />
+      <a-form-item label="平时成绩提交">
+        <a-select class="w-100px" v-model="queryParams.regularSubmitted" allow-clear>
+          <a-select-option value="submitted">已提交</a-select-option>
+          <a-select-option value="submitting">提交中</a-select-option>
+          <a-select-option value="unsubmitted">未提交</a-select-option>
+          <a-select-option value="unnecessary">无需提交</a-select-option>
+        </a-select>
       </a-form-item>
-<!--      <a-form-item label="校区">-->
-<!--        <a-select v-model="conditions.search['campus']">-->
-<!--          <a-select-option value="">全部</a-select-option>-->
-<!--          <a-select-option value="瑶湖">瑶湖</a-select-option>-->
-<!--          <a-select-option value="青山湖">青山湖</a-select-option>-->
-<!--        </a-select>-->
-<!--      </a-form-item>-->
-<!--      <a-form-item label="筛除时间冲突选项">-->
-<!--        <a-switch v-model="conditions.filterConflicts" checked-children="是" un-checked-children="否" />-->
-<!--      </a-form-item>-->
-<!--      <a-form-item label="容量不高于">-->
-<!--        <a-input-number class="w-80px" v-model.number="conditions.number" placeholder="不限" :min="0" :max="9999" />-->
-<!--      </a-form-item>-->
-<!--      <a-form-item label="显示选项">-->
-<!--        <a-radio-group v-model="conditions.displayOption">-->
-<!--          <a-radio :value="0">全部</a-radio>-->
-<!--          <a-radio :value="1">只显示未待选</a-radio>-->
-<!--          <a-radio :value="2">只显示已待选</a-radio>-->
-<!--        </a-radio-group>-->
-<!--      </a-form-item>-->
+      <a-form-item label="总评成绩提交">
+        <a-select class="w-100px" v-model="queryParams.totalSubmitted" allow-clear>
+          <a-select-option value="submitted">已提交</a-select-option>
+          <a-select-option value="submitting">提交中</a-select-option>
+          <a-select-option value="unsubmitted">未提交</a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item label="期中成绩提交">
+        <a-select class="w-100px" v-model="queryParams.midtermSubmitted" allow-clear>
+          <a-select-option value="submitted">已提交</a-select-option>
+          <a-select-option value="submitting">提交中</a-select-option>
+          <a-select-option value="unsubmitted">未提交</a-select-option>
+          <a-select-option value="unnecessary">无需提交</a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item>
+        <a-button type="primary" @click="handleSearch">查询</a-button>
+        <a-button style="margin-left: 8px" @click="handleReset">重置</a-button>
+      </a-form-item>
     </a-form>
   </a-card>
 </template>
 
 <script>
-  import { LookupConditionsMixin } from '@/mixins/LookupPanel'
-
-  export default {
-    name: 'LookupConditions',
-    mixins: [LookupConditionsMixin]
+export default {
+  name: 'LookupConditions',
+  data () {
+    return {
+      queryParams: {
+        collegeName: '',
+        courseName: '',
+        courseId: '',
+        className: '',
+        teacherId: '',
+        teacherName: '',
+        regularSubmitted: '',
+        totalSubmitted: '',
+        midtermSubmitted: ''
+      }
+    }
+  },
+  methods: {
+    getQueryParams () {
+      const params = {}
+      Object.keys(this.queryParams).forEach(key => {
+        if (this.queryParams[key]) {
+          params[key] = this.queryParams[key]
+        }
+      })
+      return params
+    },
+    handleSearch () {
+      this.$emit('filter', this.queryParams)
+    },
+    handleReset () {
+      this.queryParams = {
+        collegeName: '',
+        courseName: '',
+        courseId: '',
+        className: '',
+        teacherId: '',
+        teacherName: '',
+        regularSubmitted: '',
+        totalSubmitted: '',
+        midtermSubmitted: ''
+      }
+      this.$emit('filter', this.queryParams)
+    }
   }
+}
 </script>
 
 <style scoped>

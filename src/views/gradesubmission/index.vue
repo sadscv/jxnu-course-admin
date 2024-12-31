@@ -2,180 +2,414 @@
   <page-header-wrapper :title="false">
     <div class="grade-submission-wrapper">
       <LookupConditions ref="conditions" @filter="fetchData" />
-
+      
       <a-table
         ref="table"
         class="table"
         :loading="tableLoading"
         :data-source="rows"
-        :locale="{ emptyText: '没有匹配的记录' }"
-        :pagination="{ position: 'both', showTotal: total => `${total} 条记录` }"
+        :locale="{emptyText: '没有匹配的记录'}"
+        :pagination="pagination"
+        @change="handleTableChange"
       >
-        <!-- 课程基本信息 -->
-        <a-table-column title="课程管理单位" data-index="course">
-          <template v-slot="text, record">
-            <strong>{{ record.college.name }}</strong>
-            <br />
-            <small class="id-info">{{ record.course.id }}</small>
-          </template>
-        </a-table-column>
-        <a-table-column title="课程名称" data-index="course">
-          <template v-slot="text, record">
-            <strong>{{ record.course.name }}</strong>
-            <br />
-            <small class="id-info">{{ record.course.id }}</small>
+        <a-table-column 
+          title="课程管理单位" 
+          data-index="college"
+          column-key="college"
+          :sorter="true"
+        >
+          <template v-slot="college">
+            <strong>{{ college.name }}</strong>
           </template>
         </a-table-column>
 
-        <a-table-column title="班级名称" data-index="class">
-          <template v-slot="text, record">
-            <strong>{{ record.class.name }}</strong>
-            <br />
-            <small class="id-info">{{ record.class.id }}</small>
+        <a-table-column 
+          title="课程信息" 
+          data-index="course"
+          column-key="course"
+          :sorter="true"
+        >
+          <template v-slot="course">
+            <div class="course-info">
+              <strong class="course-name">{{ course.name }}</strong>
+              <small class="text-secondary">课程号：{{ course.id.trim() }}</small>
+            </div>
           </template>
         </a-table-column>
 
-        <a-table-column title="任课教师" data-index="teacher">
-          <template v-slot="text, record">
-            <strong>{{ record.teacher.name }}</strong>
-            <br />
-            <small class="id-info">{{ record.teacher.id }}</small>
+        <a-table-column title="班级信息" data-index="class_info">
+          <template v-slot="class_info">
+            <div>
+              <strong>{{ class_info.name }}</strong>
+              <br/>
+              <small class="text-secondary">班级号：{{ class_info.id.trim() }}</small>
+              <!-- <div class="student-count">学生数：{{ class_info.submission_status.student_count }}人</div> -->
+            </div>
           </template>
         </a-table-column>
 
-        <!-- 设定成绩比例 -->
-        <a-table-column title="设定成绩比例" data-index="gradeProportion">
-          <template v-slot="text, record">
-            <a-button type="primary" @click="openProportionModal(record)">设定比例</a-button>
+        <a-table-column 
+          title="任课教师" 
+          data-index="teacher"
+          column-key="teacher"
+          :sorter="true"
+        >
+          <template v-slot="teacher">
+            <div>
+              <strong>{{ teacher.name }}</strong>
+              <br/>
+              <small class="text-secondary">工号：{{ teacher.id.trim() }}</small>
+            </div>
           </template>
         </a-table-column>
+
+        <a-table-column title="成绩比例" data-index="submission_status">
+          <template v-slot="status">
+            <div class="score-weights">
+              <div class="weights-row">
+                <template v-if="status.score_weights.regular > 0">
+                  <a-tag class="weight-item" color="blue">
+                    平时 {{ status.score_weights.regular * 100 }}%
+                  </a-tag>
+                </template>
+                <template v-if="status.score_weights.midterm > 0">
+                  <a-tag class="weight-item" color="blue">
+                    期中 {{ status.score_weights.midterm * 100 }}%
+                  </a-tag>
+                </template>
+                <template v-if="status.score_weights.practice > 0">
+                  <a-tag class="weight-item" color="blue">
+                    实践 {{ status.score_weights.practice * 100 }}%
+                  </a-tag>
+                </template>
+                <template v-if="status.score_weights.final > 0">
+                  <a-tag class="weight-item" color="blue">
+                    期末 {{ status.score_weights.final * 100 }}%
+                  </a-tag>
+                </template>
+              </div>
+              <div class="total-row" :class="{'error-text': !isValidProportion(status.score_weights)}">
+                合计: {{ calculateTotal(status.score_weights) * 100 }}%
+              </div>
+            </div>
+          </template>
+        </a-table-column>
+
+        <a-table-column title="平时成绩提交" data-index="submission_status">
+          <template v-slot="status">
+            <div class="d-flex align-items-center">
+              <a-tag :color="getSubmitStatusColor(status, 'regular')">
+                {{ getSubmitStatusText(status, 'regular') }}
+              </a-tag>
+              <small class="text-secondary ms-2">
+                {{ status.regular_submitted_count }}/{{ status.student_count }}
+              </small>
+            </div>
+            <div class="mt-1">
+              <a-progress
+                :percent="calculateSubmitPercentage(status, 'regular')"
+                size="small"
+                :status="getProgressStatus(status, 'regular')"
+              />
+            </div>
+          </template>
+        </a-table-column>
+
+        <a-table-column title="期中成绩提交" data-index="submission_status">
+          <template v-slot="status">
+            <template v-if="status.score_weights.midterm > 0">
+              <div class="d-flex align-items-center">
+                <a-tag :color="getSubmitStatusColor(status, 'midterm')">
+                  {{ getSubmitStatusText(status, 'midterm') }}
+                </a-tag>
+                <small class="text-secondary ms-2">
+                  {{ status.midterm_submitted_count }}/{{ status.student_count }}
+                </small>
+              </div>
+              <div class="mt-1">
+                <a-progress
+                  :percent="calculateSubmitPercentage(status, 'midterm')"
+                  size="small"
+                  :status="getProgressStatus(status, 'midterm')"
+                />
+              </div>
+            </template>
+            <template v-else>
+              <a-tag color="purple">无需提交</a-tag>
+            </template>
+          </template>
+        </a-table-column>
+
+        <a-table-column title="总评提交状态" data-index="submission_status">
+          <template v-slot="status">
+            <div class="d-flex align-items-center">
+              <a-tag :color="getTotalSubmitStatusColor(status)">
+                {{ getTotalSubmitStatusText(status) }}
+              </a-tag>
+              <small class="text-secondary ms-2">
+                {{ calculateMinSubmittedCount(status) }}/{{ status.student_count }}
+              </small>
+            </div>
+            <div class="mt-1">
+              <a-progress
+                :percent="calculateTotalSubmitPercentage(status)"
+                size="small"
+                :status="getTotalProgressStatus(status)"
+              />
+            </div>
+            <div v-if="status.last_submit_time" class="mt-1">
+              <small class="text-secondary">
+                最后提交: {{ formatDate(status.last_submit_time) }}
+              </small>
+            </div>
+            <div v-if="status.last_submit_by" class="mt-1">
+              <small class="text-secondary">
+                提交人: {{ status.last_submit_by }}
+              </small>
+            </div>
+          </template>
+        </a-table-column>
+
       </a-table>
-
-      <!-- 成绩比例设定模态框 -->
-      <a-modal
-        v-model="isModalVisible"
-        title="设定成绩比例"
-        @ok="handleProportionSubmit"
-        @cancel="handleProportionCancel"
-      >
-        <a-form :form="form">
-          <a-form-item label="平时成绩">
-            <a-input-number
-              v-decorator="['regularGrade', decoratorOptions]"
-              :min="0"
-              :max="1"
-              :step="0.01"
-            />
-          </a-form-item>
-          <a-form-item label="期中成绩">
-            <a-input-number
-              v-decorator="['midtermGrade', decoratorOptions]"
-              :min="0"
-              :max="1"
-              :step="0.01"
-            />
-          </a-form-item>
-          <a-form-item label="实践成绩">
-            <a-input-number
-              v-decorator="['practicalGrade', decoratorOptions]"
-              :min="0"
-              :max="1"
-              :step="0.01"
-            />
-          </a-form-item>
-          <a-form-item label="期末成绩">
-            <a-input-number
-              v-decorator="['finalGrade', decoratorOptions]"
-              :min="0"
-              :max="1"
-              :step="0.01"
-            />
-          </a-form-item>
-          <a-form-item>
-            <div>总计：{{ totalProportion }}</div>
-            <!--            <div v-if="totalProportion !== 1" style="color: red;">-->
-            <!--              比例之和必须等于1！-->
-            <!--            </div>-->
-          </a-form-item>
-        </a-form>
-      </a-modal>
     </div>
   </page-header-wrapper>
 </template>
 
 <script>
-
-import LookupConditionsMixin from './LookupConditions'
+import { getGradeSubmissionList } from '@/api/grade'
+import LookupConditions from './LookupConditions'
+import moment from 'moment'
 
 export default {
   name: 'GradeSubmission',
   components: {
-    LookupConditionsMixin
+    LookupConditions
   },
   data () {
     return {
       tableLoading: false,
       rows: [],
-      isModalVisible: false,
-      currentRecord: null,
-      form: this.$form.createForm(this)
-    }
-  },
-  computed: {
-    totalProportion () {
-      const { regularGrade, midtermGrade, practicalGrade, finalGrade } = this.form.getFieldsValue()
-      return (
-        (regularGrade || 0) +
-        (midtermGrade || 0) +
-        (practicalGrade || 0) +
-        (finalGrade || 0)
-      )
-    },
-    decoratorOptions () {
-      return {
-        rules: [{ required: true, message: '请输入比例' }],
-        initialValue: 0
+      rawData: [],
+      pagination: {
+        current: 1,
+        pageSize: 10,
+        total: 0,
+        showTotal: total => `共 ${total} 条记录`
       }
     }
   },
   methods: {
-    fetchData () {
-      // 模拟获取数据
+    async fetchData (params = {}) {
       this.tableLoading = true
-      setTimeout(() => {
-        this.rows = [
-          {
-            key: '1',
-            college: { name: '计算机科学与技术学院' },
-            course: { id: 'C001', name: '高等数学' },
-            class: { id: 'CL001', name: '计算机科学1班' },
-            teacher: { id: 'T001', name: '张老师' }
-          }
-          // 更多数据...
-        ]
+      try {
+        const queryParams = this.$refs.conditions ? this.$refs.conditions.getQueryParams() : {}
+        const { regularSubmitted, midtermSubmitted, totalSubmitted, ...apiParams } = queryParams
+        
+        const { data } = await getGradeSubmissionList({
+          ...apiParams
+        })
+        
+        this.rawData = data.data
+        this.filterData(regularSubmitted, undefined, false, midtermSubmitted, totalSubmitted)
+      } catch (error) {
+        this.$message.error('获取数据失败：' + error.message)
+      } finally {
         this.tableLoading = false
-      }, 1000)
-    },
-    openProportionModal (record) {
-      this.currentRecord = record
-      this.isModalVisible = true
-      this.form.resetFields()
-    },
-    handleProportionSubmit () {
-      if (this.totalProportion !== 1) {
-        this.$message.error('比例之和必须等于1！')
-        return
       }
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          // 提交数据
-          console.log('提交的比例数据：', values)
-          this.isModalVisible = false
-        }
-      })
     },
-    handleProportionCancel () {
-      this.isModalVisible = false
+    filterData(regularSubmitted, sorter, keepCurrentPage = false, midtermSubmitted, totalSubmitted) {
+      let filteredData = this.rawData
+      const queryParams = this.$refs.conditions ? this.$refs.conditions.getQueryParams() : {}
+      
+      // 平时成绩提交状态筛选
+      if (regularSubmitted !== undefined) {
+        filteredData = filteredData.filter(item => {
+          const percentage = this.calculateSubmitPercentage(item.submission_status, 'regular')
+          const threshold = item.submission_status.student_count < 20 ? 60 : 80
+          switch (regularSubmitted) {
+            case 'submitted':
+              return percentage >= threshold
+            case 'submitting':
+              return percentage > 0 && percentage < threshold
+            case 'unsubmitted':
+              return percentage === 0
+            default:
+              return true
+          }
+        })
+      }
+
+      // 期中成绩提交状态筛选
+      if (midtermSubmitted !== undefined) {
+        filteredData = filteredData.filter(item => {
+          if (midtermSubmitted === 'unnecessary') {
+            return item.submission_status.score_weights.midterm === 0
+          }
+          
+          if (item.submission_status.score_weights.midterm === 0) {
+            return false
+          }
+          
+          const percentage = this.calculateSubmitPercentage(item.submission_status, 'midterm')
+          const threshold = item.submission_status.student_count < 20 ? 60 : 80
+          switch (midtermSubmitted) {
+            case 'submitted':
+              return percentage >= threshold
+            case 'submitting':
+              return percentage > 0 && percentage < threshold
+            case 'unsubmitted':
+              return percentage === 0
+            default:
+              return true
+          }
+        })
+      }
+
+      // 总评成绩提交状态筛选
+      if (totalSubmitted !== undefined) {
+        filteredData = filteredData.filter(item => {
+          const percentage = this.calculateTotalSubmitPercentage(item.submission_status)
+          const threshold = item.submission_status.student_count < 20 ? 60 : 80
+          switch (totalSubmitted) {
+            case 'submitted':
+              return percentage >= threshold
+            case 'submitting':
+              return percentage > 0 && percentage < threshold
+            case 'unsubmitted':
+              return percentage === 0
+            default:
+              return true
+          }
+        })
+      }
+
+      if (queryParams.validProportion !== undefined) {
+        filteredData = filteredData.filter(item => {
+          const isValid = this.isValidProportion(item.submission_status.score_weights)
+          return queryParams.validProportion ? isValid : !isValid
+        })
+      }
+
+      // 最后才进行排序处理
+      if (sorter && sorter.order) {
+        const { columnKey, order } = sorter
+        filteredData = [...filteredData].sort((a, b) => {
+          let result = 0
+          switch (columnKey) {
+            case 'college':
+              result = a.college.name.localeCompare(b.college.name, 'zh-CN')
+              break
+            case 'course':
+              result = a.course.name.localeCompare(b.course.name, 'zh-CN')
+              break
+            case 'teacher':
+              result = a.teacher.name.localeCompare(b.teacher.name, 'zh-CN')
+              break
+          }
+          return order === 'ascend' ? result : -result
+        })
+      }
+      
+      // 更新分页信息和当前页数据
+      this.pagination = {
+        ...this.pagination,
+        total: filteredData.length,
+        current: keepCurrentPage ? this.pagination.current : 1
+      }
+      
+      const start = (this.pagination.current - 1) * this.pagination.pageSize
+      const end = start + this.pagination.pageSize
+      this.rows = filteredData.slice(start, end)
+    },
+    handleTableChange (pagination, filters, sorter) {
+      this.pagination.current = pagination.current
+      const queryParams = this.$refs.conditions ? this.$refs.conditions.getQueryParams() : {}
+      this.filterData(
+        queryParams.regularSubmitted,
+        sorter,
+        true,
+        queryParams.midtermSubmitted,
+        queryParams.totalSubmitted
+      )
+    },
+    formatDate (date) {
+      return date ? moment(date).format('YYYY-MM-DD HH:mm:ss') : '-'
+    },
+    calculateTotal (weights) {
+      return weights.regular + weights.midterm + weights.practice + weights.final
+    },
+    isValidProportion (weights) {
+      return Math.abs(this.calculateTotal(weights) - 1) < 0.0001
+    },
+    calculateSubmitPercentage(status, type = 'regular') {
+      if (!status.student_count) return 0
+      const submittedCount = type === 'regular' ? status.regular_submitted_count : status.midterm_submitted_count
+      return Math.round((submittedCount / status.student_count) * 100)
+    },
+    getProgressStatus(status, type = 'regular') {
+      const percentage = this.calculateSubmitPercentage(status, type)
+      const threshold = status.student_count < 20 ? 80 : 90
+      if (percentage === 0) return 'exception'
+      if (percentage >= threshold) return 'success'
+      return 'active'
+    },
+    getSubmitStatusColor(status, type = 'regular') {
+      const percentage = this.calculateSubmitPercentage(status, type)
+      const threshold = status.student_count < 20 ? 80 : 90
+      if (percentage >= threshold) return 'green'
+      if (percentage > 0) return 'orange'
+      return 'red'
+    },
+    getSubmitStatusText(status, type = 'regular') {
+      const percentage = this.calculateSubmitPercentage(status, type)
+      const threshold = status.student_count < 20 ? 80 : 90
+      if (percentage >= threshold) return '已提交'
+      if (percentage > 0) return '提交中'
+      return '未提交'
+    },
+    calculateTotalSubmitPercentage(status) {
+      if (!status.student_count) return 0
+      return Math.round((this.calculateMinSubmittedCount(status) / status.student_count) * 100)
+    },
+    getTotalSubmitStatusColor(status) {
+      const percentage = this.calculateTotalSubmitPercentage(status)
+      const threshold = status.student_count < 20 ? 60 : 80
+      if (percentage >= threshold) return 'green'
+      if (percentage > 0) return 'orange'
+      return 'red'
+    },
+    getTotalSubmitStatusText(status) {
+      const percentage = this.calculateTotalSubmitPercentage(status)
+      const threshold = status.student_count < 20 ? 60 : 80
+      if (percentage >= threshold) return '已提交'
+      if (percentage > 0) return '提交中'
+      return '未提交'
+    },
+    getTotalProgressStatus(status) {
+      const percentage = this.calculateTotalSubmitPercentage(status)
+      const threshold = status.student_count < 20 ? 60 : 80
+      if (percentage === 0) return 'exception'
+      if (percentage >= threshold) return 'success'
+      return 'active'
+    },
+    calculateMinSubmittedCount(status) {
+      // 找出所有权重不为0的分项
+      const submittedCounts = []
+      
+      if (status.score_weights.regular > 0) {
+        submittedCounts.push(status.regular_submitted_count || 0)
+      }
+      if (status.score_weights.midterm > 0) {
+        submittedCounts.push(status.midterm_submitted_count || 0)
+      }
+      if (status.score_weights.practice > 0) {
+        submittedCounts.push(status.practice_submitted_count || 0)
+      }
+      if (status.score_weights.final > 0) {
+        submittedCounts.push(status.final_submitted_count || 0)
+      }
+      
+      return submittedCounts.length > 0 ? Math.min(...submittedCounts) : 0
     }
   },
   mounted () {
@@ -186,31 +420,67 @@ export default {
 
 <style scoped>
 .grade-submission-wrapper {
-  padding-top: 0;
-  padding-bottom: 0;
+  background: #fff;
+  padding: 24px;
 }
 
-.table >>> .ant-table-pagination {
-  margin-left: 16px;
-  margin-right: 16px;
-}
-
-.table >>> .ant-table-thead th {
-  white-space: nowrap;
-}
-
-.table >>> .ant-table-thead th,
-.table >>> .ant-table-row td {
-  padding: 12px;
-}
-
-.table >>> .ant-table-thead th:first-child,
-.table >>> .ant-table-row td:first-child {
-  padding-left: 16px;
-}
-
-.id-info {
-  color: rgba(0, 0, 0, 0.35);
+.text-secondary {
+  color: rgba(0, 0, 0, 0.45);
   font-size: 12px;
+}
+
+.mt-1 {
+  margin-top: 4px;
+}
+
+.student-count {
+  color: #1890ff;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.score-weights {
+  padding: 4px 0;
+}
+
+.weights-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.weight-item {
+  text-align: center;
+  margin: 0;
+  min-width: 60px;
+}
+
+.total-row {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.65);
+  padding-top: 4px;
+  border-top: 1px dashed #e8e8e8;
+}
+
+.error-text {
+  color: #ff4d4f;
+}
+
+.ant-progress {
+  margin-bottom: 4px;
+}
+
+.course-info {
+  width: 100%;
+  min-width: 0;
+}
+
+.course-name {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

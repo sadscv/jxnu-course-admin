@@ -119,8 +119,8 @@ const vueConfig = {
     proxy: {
       '/API/v1.0': {
         // target: 'http://219.229.250.21:8080',
-        target: 'http://127.0.0.1:5000',
-        // target: 'http://150.158.195.65:7015',
+        // target: 'http://127.0.0.1:5000',
+        target: 'http://172.16.3.205:5000',
         secure: false,
         ws: false,
         changeOrigin: true
