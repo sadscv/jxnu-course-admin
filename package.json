@@ -17,6 +17,7 @@
     "axios": "^0.26.1",
     "core-js": "^3.21.1",
     "enquire.js": "^2.1.6",
+    "file-saver": "^2.0.5",
     "icons-vue": "^1.0.9",
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
@@ -37,7 +38,9 @@
     "vue-svg-component-runtime": "^1.0.1",
     "vuex": "^3.6.2",
     "wangeditor": "^3.1.1",
-    "worker-plugin": "^5.0.1"
+    "worker-plugin": "^5.0.1",
+    "xlsx": "^0.18.5",
+    "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
     "@ant-design/colors": "^3.2.2",

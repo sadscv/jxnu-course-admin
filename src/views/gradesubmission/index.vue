@@ -1,7 +1,7 @@
 <template>
   <page-header-wrapper :title="false">
     <div class="grade-submission-wrapper">
-      <LookupConditions ref="conditions" @filter="fetchData" />
+      <LookupConditions ref="conditions" @filter="fetchData" @export="exportData" />
       
       <a-table
         ref="table"
@@ -101,11 +101,13 @@
               <a-tag :color="getSubmitStatusColor(status, 'regular')">
                 {{ getSubmitStatusText(status, 'regular') }}
               </a-tag>
-              <small class="text-secondary ms-2">
+              <small v-if="!(isValidProportion(status.score_weights) && status.score_weights.regular === 0)" 
+                     class="text-secondary ms-2">
                 {{ status.regular_submitted_count }}/{{ status.student_count }}
               </small>
             </div>
-            <div class="mt-1">
+            <div v-if="!(isValidProportion(status.score_weights) && status.score_weights.regular === 0)" 
+                 class="mt-1">
               <a-progress
                 :percent="calculateSubmitPercentage(status, 'regular')"
                 size="small"
@@ -117,7 +119,7 @@
 
         <a-table-column title="期中成绩提交" data-index="submission_status">
           <template v-slot="status">
-            <template v-if="status.score_weights.midterm > 0">
+            <template v-if="!(isValidProportion(status.score_weights) && status.score_weights.midterm === 0)">
               <div class="d-flex align-items-center">
                 <a-tag :color="getSubmitStatusColor(status, 'midterm')">
                   {{ getSubmitStatusText(status, 'midterm') }}
@@ -135,7 +137,7 @@
               </div>
             </template>
             <template v-else>
-              <a-tag color="purple">无需提交</a-tag>
+              <a-tag color="green">无需提交</a-tag>
             </template>
           </template>
         </a-table-column>
@@ -179,6 +181,8 @@
 import { getGradeSubmissionList } from '@/api/grade'
 import LookupConditions from './LookupConditions'
 import moment from 'moment'
+import { saveAs } from 'file-saver'
+import * as XLSX from 'xlsx-js-style'
 
 export default {
   name: 'GradeSubmission',
@@ -205,11 +209,14 @@ export default {
         const queryParams = this.$refs.conditions ? this.$refs.conditions.getQueryParams() : {}
         const { regularSubmitted, midtermSubmitted, totalSubmitted, ...apiParams } = queryParams
         
-        const { data } = await getGradeSubmissionList({
-          ...apiParams
-        })
+        // 首次加载或存在需要后端过滤的参数时调用API
+        if (!this.rawData.length || Object.keys(apiParams).length > 0) {
+          const { data } = await getGradeSubmissionList({
+            ...apiParams
+          })
+          this.rawData = data.data
+        }
         
-        this.rawData = data.data
         this.filterData(regularSubmitted, undefined, false, midtermSubmitted, totalSubmitted)
       } catch (error) {
         this.$message.error('获取数据失败：' + error.message)
@@ -218,12 +225,23 @@ export default {
       }
     },
     filterData(regularSubmitted, sorter, keepCurrentPage = false, midtermSubmitted, totalSubmitted) {
-      let filteredData = this.rawData
-      const queryParams = this.$refs.conditions ? this.$refs.conditions.getQueryParams() : {}
+      let filteredData = [...this.rawData]  // 创建一个新的数组副本
       
       // 平时成绩提交状态筛选
-      if (regularSubmitted !== undefined) {
+      if (regularSubmitted !== undefined && regularSubmitted !== '') {
         filteredData = filteredData.filter(item => {
+          // 如果选择"无需提交"，只显示成绩比例合计为100%且平时成绩比例为0的记录
+          if (regularSubmitted === 'unnecessary') {
+            return this.isValidProportion(item.submission_status.score_weights) && 
+                   item.submission_status.score_weights.regular === 0
+          }
+          
+          // 对于其他所有筛选条件，都应该排除成绩比例合计为100%且平时成绩比例为0的记录
+          if (this.isValidProportion(item.submission_status.score_weights) && 
+              item.submission_status.score_weights.regular === 0) {
+            return false
+          }
+          
           const percentage = this.calculateSubmitPercentage(item.submission_status, 'regular')
           const threshold = item.submission_status.student_count < 20 ? 60 : 80
           switch (regularSubmitted) {
@@ -238,15 +256,17 @@ export default {
           }
         })
       }
-
+      
       // 期中成绩提交状态筛选
-      if (midtermSubmitted !== undefined) {
+      if (midtermSubmitted !== undefined && midtermSubmitted !== '') {
         filteredData = filteredData.filter(item => {
           if (midtermSubmitted === 'unnecessary') {
-            return item.submission_status.score_weights.midterm === 0
+            return this.isValidProportion(item.submission_status.score_weights) && 
+                   item.submission_status.score_weights.midterm === 0
           }
           
-          if (item.submission_status.score_weights.midterm === 0) {
+          if (this.isValidProportion(item.submission_status.score_weights) && 
+              item.submission_status.score_weights.midterm === 0) {
             return false
           }
           
@@ -264,9 +284,9 @@ export default {
           }
         })
       }
-
+      
       // 总评成绩提交状态筛选
-      if (totalSubmitted !== undefined) {
+      if (totalSubmitted !== undefined && totalSubmitted !== '') {
         filteredData = filteredData.filter(item => {
           const percentage = this.calculateTotalSubmitPercentage(item.submission_status)
           const threshold = item.submission_status.student_count < 20 ? 60 : 80
@@ -283,43 +303,10 @@ export default {
         })
       }
 
-      if (queryParams.validProportion !== undefined) {
-        filteredData = filteredData.filter(item => {
-          const isValid = this.isValidProportion(item.submission_status.score_weights)
-          return queryParams.validProportion ? isValid : !isValid
-        })
+      this.rows = filteredData
+      if (!keepCurrentPage) {
+        this.pagination.current = 1
       }
-
-      // 最后才进行排序处理
-      if (sorter && sorter.order) {
-        const { columnKey, order } = sorter
-        filteredData = [...filteredData].sort((a, b) => {
-          let result = 0
-          switch (columnKey) {
-            case 'college':
-              result = a.college.name.localeCompare(b.college.name, 'zh-CN')
-              break
-            case 'course':
-              result = a.course.name.localeCompare(b.course.name, 'zh-CN')
-              break
-            case 'teacher':
-              result = a.teacher.name.localeCompare(b.teacher.name, 'zh-CN')
-              break
-          }
-          return order === 'ascend' ? result : -result
-        })
-      }
-      
-      // 更新分页信息和当前页数据
-      this.pagination = {
-        ...this.pagination,
-        total: filteredData.length,
-        current: keepCurrentPage ? this.pagination.current : 1
-      }
-      
-      const start = (this.pagination.current - 1) * this.pagination.pageSize
-      const end = start + this.pagination.pageSize
-      this.rows = filteredData.slice(start, end)
     },
     handleTableChange (pagination, filters, sorter) {
       this.pagination.current = pagination.current
@@ -347,22 +334,37 @@ export default {
       return Math.round((submittedCount / status.student_count) * 100)
     },
     getProgressStatus(status, type = 'regular') {
+      if (this.isValidProportion(status.score_weights) && 
+          status.score_weights[type] === 0) {
+        return 'success'
+      }
+      
       const percentage = this.calculateSubmitPercentage(status, type)
-      const threshold = status.student_count < 20 ? 80 : 90
+      const threshold = status.student_count < 20 ? 60 : 80
       if (percentage === 0) return 'exception'
       if (percentage >= threshold) return 'success'
       return 'active'
     },
     getSubmitStatusColor(status, type = 'regular') {
+      if (this.isValidProportion(status.score_weights) && 
+          status.score_weights[type] === 0) {
+        return 'green'
+      }
+      
       const percentage = this.calculateSubmitPercentage(status, type)
-      const threshold = status.student_count < 20 ? 80 : 90
+      const threshold = status.student_count < 20 ? 60 : 80
       if (percentage >= threshold) return 'green'
       if (percentage > 0) return 'orange'
       return 'red'
     },
     getSubmitStatusText(status, type = 'regular') {
+      if (this.isValidProportion(status.score_weights) && 
+          status.score_weights[type] === 0) {
+        return '无需提交'
+      }
+      
       const percentage = this.calculateSubmitPercentage(status, type)
-      const threshold = status.student_count < 20 ? 80 : 90
+      const threshold = status.student_count < 20 ? 60 : 80
       if (percentage >= threshold) return '已提交'
       if (percentage > 0) return '提交中'
       return '未提交'
@@ -410,6 +412,65 @@ export default {
       }
       
       return submittedCounts.length > 0 ? Math.min(...submittedCounts) : 0
+    },
+    exportData() {
+      // 准备表头和样式
+      const headers = [
+        '课程管理单位', '课程名称', '课程号', '班级', '班级号', 
+        '教师姓名', '教师工号', '平时成绩比例', '期中成绩比例', 
+        '期末成绩比例', '实践成绩比例', '平时成绩提交状态', 
+        '期中成绩提交状态', '总评提交状态', '最后提交时间', '最后提交人'
+      ]
+      
+      // 准备数据
+      const data = [headers]
+      this.rawData.forEach(item => {
+        data.push([
+          item.college.name,
+          item.course.name,
+          item.course.id,
+          item.class_info.name,
+          item.class_info.id,
+          item.teacher.name,
+          item.teacher.id,
+          `${item.submission_status.score_weights.regular * 100}%`,
+          `${item.submission_status.score_weights.midterm * 100}%`,
+          `${item.submission_status.score_weights.final * 100}%`,
+          `${item.submission_status.score_weights.practice * 100}%`,
+          this.getSubmitStatusText(item.submission_status, 'regular'),
+          this.getSubmitStatusText(item.submission_status, 'midterm'),
+          this.getTotalSubmitStatusText(item.submission_status),
+          item.submission_status.last_submit_time ? moment(item.submission_status.last_submit_time).format('YYYY-MM-DD HH:mm:ss') : '-',
+          item.submission_status.last_submit_by || '-'
+        ])
+      })
+
+      // 创建工作簿和工作表
+      const wb = XLSX.utils.book_new()
+      const ws = XLSX.utils.aoa_to_sheet(data)
+      
+      // 设置列宽
+      ws['!cols'] = [
+        { wch: 15 }, { wch: 30 }, { wch: 10 }, { wch: 15 }, { wch: 10 },
+        { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
+        { wch: 12 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 20 },
+        { wch: 15 }
+      ]
+
+      // 添加工作表到工作簿
+      XLSX.utils.book_append_sheet(wb, ws, '成绩提交情况')
+
+      // 生成二进制数据
+      const wbout = XLSX.write(wb, { 
+        bookType: 'xlsx', 
+        type: 'array' 
+      })
+
+      // 使用 file-saver 保存文件
+      const blob = new Blob([wbout], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      })
+      saveAs(blob, `成绩提交情况_${moment().format('YYYY-MM-DD_HHmmss')}.xlsx`)
     }
   },
   mounted () {

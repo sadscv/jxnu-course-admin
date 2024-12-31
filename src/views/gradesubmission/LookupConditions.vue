@@ -1,5 +1,5 @@
 <template>
-  <a-card class="lookup-conditions" size="small">
+  <a-card class="lookup-conditions mb-4">
     <a-form ref="form" layout="inline">
       <a-form-item label="单位名称">
         <a-input class="w-120px" v-model="queryParams.collegeName" allow-clear />
@@ -10,17 +10,25 @@
       <a-form-item label="课程号">
         <a-input class="w-80px" v-model="queryParams.courseId" allow-clear />
       </a-form-item>
-      <a-form-item label="班级名称">
+      <!-- <a-form-item label="班级名称">
         <a-input class="w-120px" v-model="queryParams.className" allow-clear />
       </a-form-item>
       <a-form-item label="教师工号">
         <a-input class="w-100px" v-model="queryParams.teacherId" allow-clear />
-      </a-form-item>
+      </a-form-item> -->
       <a-form-item label="教师姓名">
         <a-input class="w-100px" v-model="queryParams.teacherName" allow-clear />
       </a-form-item>
       <a-form-item label="平时成绩提交">
         <a-select class="w-100px" v-model="queryParams.regularSubmitted" allow-clear>
+          <a-select-option value="submitted">已提交</a-select-option>
+          <a-select-option value="submitting">提交中</a-select-option>
+          <a-select-option value="unsubmitted">未提交</a-select-option>
+          <a-select-option value="unnecessary">无需提交</a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item label="期中成绩提交">
+        <a-select class="w-100px" v-model="queryParams.midtermSubmitted" allow-clear>
           <a-select-option value="submitted">已提交</a-select-option>
           <a-select-option value="submitting">提交中</a-select-option>
           <a-select-option value="unsubmitted">未提交</a-select-option>
@@ -34,17 +42,17 @@
           <a-select-option value="unsubmitted">未提交</a-select-option>
         </a-select>
       </a-form-item>
-      <a-form-item label="期中成绩提交">
-        <a-select class="w-100px" v-model="queryParams.midtermSubmitted" allow-clear>
-          <a-select-option value="submitted">已提交</a-select-option>
-          <a-select-option value="submitting">提交中</a-select-option>
-          <a-select-option value="unsubmitted">未提交</a-select-option>
-          <a-select-option value="unnecessary">无需提交</a-select-option>
-        </a-select>
-      </a-form-item>
       <a-form-item>
         <a-button type="primary" @click="handleSearch">查询</a-button>
         <a-button style="margin-left: 8px" @click="handleReset">重置</a-button>
+        <a-button 
+          type="primary" 
+          style="margin-left: 8px" 
+          icon="download"
+          @click="$emit('export')"
+        >
+          导出数据
+        </a-button>
       </a-form-item>
     </a-form>
   </a-card>
@@ -79,7 +87,22 @@ export default {
       return params
     },
     handleSearch () {
-      this.$emit('filter', this.queryParams)
+      const params = this.getQueryParams()
+      // 只有当存在需要后端过滤的参数时才重新获取数据
+      if (params.collegeName || params.courseName || params.courseId || 
+          params.teacherName || params.className || params.teacherId ||
+          params.regularSubmitted || params.midtermSubmitted || params.totalSubmitted) {
+        this.$emit('filter', this.queryParams)
+      } else {
+        // 如果没有任何筛选参数，也需要触发一次筛选
+        this.$parent.filterData(
+          params.regularSubmitted,
+          undefined,
+          false,
+          params.midtermSubmitted,
+          params.totalSubmitted
+        )
+      }
     },
     handleReset () {
       this.queryParams = {
