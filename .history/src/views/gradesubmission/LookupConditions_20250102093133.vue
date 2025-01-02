@@ -43,18 +43,13 @@
         </a-select>
       </a-form-item>
       <a-form-item>
-        <a-space size="middle">
-          <a-space>
-            <a-button type="primary" @click="handleSearch">查询</a-button>
-            <a-button @click="handleReset">重置</a-button>
-          </a-space>
-          <a-divider type="vertical" />
-          <a-space>
-            <a-button type="primary" @click="$emit('export')">导出</a-button>
-            <a-button type="primary" @click="$emit('showProgress')">
-              查看学院提交进度
-            </a-button>
-          </a-space>
+        <a-space>
+          <a-button type="primary" @click="handleSearch">查询</a-button>
+          <a-button @click="handleReset">重置</a-button>
+          <a-button type="primary" @click="$emit('export')">导出</a-button>
+          <a-button type="primary" @click="$emit('showProgress')">
+            查看学院提交进度
+          </a-button>
         </a-space>
       </a-form-item>
     </a-form>

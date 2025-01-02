@@ -727,7 +727,7 @@ export default {
 
 .ant-progress {
   margin-bottom: 4px;
-  width: 100%;
+  width: 70%;
 }
 
 .course-info {

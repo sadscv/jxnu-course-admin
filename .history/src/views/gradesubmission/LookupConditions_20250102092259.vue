@@ -1,6 +1,6 @@
 <template>
-  <div class="lookup-conditions">
-    <a-form layout="inline">
+  <a-card class="lookup-conditions mb-4">
+    <a-form ref="form" layout="inline">
       <a-form-item label="单位名称">
         <a-input class="w-120px" v-model="queryParams.collegeName" allow-clear />
       </a-form-item>
@@ -43,22 +43,17 @@
         </a-select>
       </a-form-item>
       <a-form-item>
-        <a-space size="middle">
-          <a-space>
-            <a-button type="primary" @click="handleSearch">查询</a-button>
-            <a-button @click="handleReset">重置</a-button>
-          </a-space>
-          <a-divider type="vertical" />
-          <a-space>
-            <a-button type="primary" @click="$emit('export')">导出</a-button>
-            <a-button type="primary" @click="$emit('showProgress')">
-              查看学院提交进度
-            </a-button>
-          </a-space>
+        <a-space>
+          <a-button type="primary" @click="handleSearch">查询</a-button>
+          <a-button @click="handleReset">重置</a-button>
+          <a-button type="primary" @click="$emit('export')">导出</a-button>
+          <a-button type="primary" @click="$emit('showProgress')">
+            查看学院提交进度
+          </a-button>
         </a-space>
       </a-form-item>
     </a-form>
-  </div>
+  </a-card>
 </template>
 
 <script>
